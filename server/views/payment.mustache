@@ -1,0 +1,18 @@
+html>body>ul+(form>(input*5))
+<html>
+    <body>
+        <ul>
+        {{#items}}
+            <li>{{title}} {{quantity}}</li>
+        {{/items}}
+        </ul>
+        <form method="POST">
+            <input name="cardHolder"/>
+            <input name="cardNumber"/>
+            <input name="cardDate" type="date"/>
+            <input name="cardCVV"/>
+            <input type="submit" value="Payer"/>
+        </form>
+        {{#success}}Payment proceed{{/success}}
+    </body>
+</html>
