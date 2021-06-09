@@ -12,7 +12,10 @@ User.init(
       primaryKey: true,
       allowNull: false
     },
-    email: DataTypes.STRING,
+    email: {
+        type: DataTypes.STRING,
+        unique: true
+    },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
