@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const { User } = require("../models/sequelize");
+const { User } = require("../models/sequelize/User");
 const { prettifyValidationErrors } = require("../lib/utils");
 
 const router = Router();

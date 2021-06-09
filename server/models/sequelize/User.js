@@ -6,24 +6,20 @@ class User extends Model {}
 
 User.init(
   {
-    firstname: DataTypes.STRING,
-    lastname: DataTypes.STRING,
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        isEmail: true,
-      },
-      unique: true,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false
     },
+    email: DataTypes.STRING,
     password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    confirmed: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
+    numPhone: {
+      type: DataTypes.STRING(13),
+      allowNull: false
     },
   },
   {

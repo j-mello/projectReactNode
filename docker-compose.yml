@@ -8,8 +8,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
-      - ./SampleCollections:/usr/local/sampleCollections
-    working_dir: /usr/local/sampleCollections
+      - ./db-data-mongo:/data/bin:rw
 
   db:
     image: postgres:alpine
