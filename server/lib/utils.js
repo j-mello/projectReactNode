@@ -4,9 +4,9 @@ exports.prettifyValidationErrors = (errors) =>
     return acc;
   }, {});
 
-exports.sendErrors = (res,req,e) => {
+exports.sendErrors = (req,res,e) => {
     console.error(e);
-    res.status(500).json({
-        errors: e.message === "Validation error" ? e.errors.map(error => error.message) : [e.message]
+    res.status(e.message === "Validation error" || e.name === "SequelizeValidationError" ? 400 : 500).json({
+        errors: e.errors ? e.errors.map(error => error.message) : [e.message]
     });
 }
