@@ -1,8 +1,8 @@
-const sequelize = require("./lib/sequelize");
+const sequelize = require("./sequelize");
 const fs = require("fs/promises");
 
 async function migrate() {
-    const path = __dirname+"/models/sequelize/";
+    const path = __dirname+"/../models/sequelize/";
     const files = (await fs.readdir(path)).filter(file => file.endsWith(".js"));
     for (const file of files) {
         require(path+file);

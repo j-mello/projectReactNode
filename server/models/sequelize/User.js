@@ -34,6 +34,7 @@ User.init(
 const updatePassword = async (user) => {
   user.password = await bcrypt.hash(user.password, await bcrypt.genSalt());
 };
+
 User.addHook("beforeCreate", updatePassword);
 User.addHook("beforeUpdate", updatePassword);
 
