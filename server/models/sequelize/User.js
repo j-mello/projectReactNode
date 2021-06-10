@@ -32,7 +32,8 @@ User.init(
 );
 
 const updatePassword = async (user) => {
-  user.password = await bcrypt.hash(user.password, await bcrypt.genSalt());
+    if (user._previousDataValues.password !== user.dataValues.password)
+        user.password = await bcrypt.hash(user.password, await bcrypt.genSalt());
 };
 
 User.addHook("beforeCreate", updatePassword);
