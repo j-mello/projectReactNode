@@ -9,23 +9,21 @@ const extractBearerToken = headerValue => {
     return matches && matches[2]
 }
 
-const  checkTokenMiddleware = (req, res, next) => {
-    // Récupération du token
+const  JWTMiddleWare = (req, res, next) => {
     const token = req.query.token || req.body.token || (req.headers.authorization && extractBearerToken(req.headers.authorization));
 
-    // Présence d'un token
     if (!token) {
         return res.sendStatus(401);
     }
 
-    // Véracité du token
     jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
         if (err) {
             res.sendStatus(401);
         } else {
-            return next()
+            req.user = decodedToken;
+            return next();
         }
     })
 }
 
-module.exports = checkTokenMiddleware;
+module.exports = JWTMiddleWare;
