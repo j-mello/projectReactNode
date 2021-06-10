@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const JWTMiddleWare = require("../lib/JWTMiddleWare");
 const User = require("../models/sequelize/User");
+const Seller = require("../models/sequelize/Seller");
 const jwt = require('jsonwebtoken');
 const { hashPassword } = require("../lib/utils");
 const bcrypt = require("bcryptjs");
@@ -12,11 +13,12 @@ router.get("/login", async (req,res) => {
     if (!password || !email) {
         res.sendStatus(500);
     } else {
-        User.findOne({where: {email}})
+        User.findOne({where: {email}, include: Seller})
             .then(async user =>
-                user == null || !(await bcrypt.compare(password,user.password)) ?
-                    res.sendStatus(404) :
+                user == null || !(await bcrypt.compare(password,user.password)) || (user.Seller != null && !user.Seller.validated) ?
+                    res.sendStatus(403) :
                     res.json({
+                        ...user.dataValues,
                         access_token: jwt.sign({
                             id: user.id,
                             email: user.email
