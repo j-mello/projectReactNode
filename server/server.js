@@ -1,7 +1,10 @@
 const express = require("express");
 const UserRouter = require("./routes/UserRouter");
+const SecurityRouter = require("./routes/SecurityRouter");
+const SellerController = require("./routes/SellerController");
 const mustacheExpress = require("mustache-express");
-const migrate = require("./sequalizeloader");
+const migrate = require("./lib/sequalizeloader");
+const jwt = require('jsonwebtoken');
 
 migrate().then(()=>{
     console.log("Exportation terminée");
@@ -15,5 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use("/users", UserRouter);
+app.use("/sellers", SellerController);
+app.use("/", SecurityRouter);
 
 app.listen(process.env.PORT || 3000, () => console.log("server listening"));
