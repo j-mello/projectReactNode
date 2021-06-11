@@ -4,7 +4,7 @@ const SecurityRouter = require("./routes/SecurityRouter");
 const SellerController = require("./routes/SellerController");
 const mustacheExpress = require("mustache-express");
 const migrate = require("./lib/sequalizeloader");
-const jwt = require('jsonwebtoken');
+const cors = require('cors');
 
 migrate().then(()=>{
     console.log("Exportation terminée");
@@ -13,6 +13,7 @@ const app = express();
 app.engine("mustache", mustacheExpress());
 app.set("view engine", "mustache");
 app.set("views", __dirname + "/views");
+app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded());
