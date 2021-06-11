@@ -2,23 +2,19 @@ import React from 'react';
 import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import { useState } from "react";
+import Form from "./Form";
 
 function Login() {
 
-    const [ fields, setFields ] = useState({
-        email: "",
-        password: ""
-    });
+    const loginModel = {
+        email: { type: 'email', label: 'Votre adresse mail'},
+        password: { type: 'password', label: 'Votre mot de passe'}
+    };
 
     const [ errors, setErrors ] = useState([])
 
-    const handleChange = (event) => {
-        setFields({...fields, [event.target.name]: event.target.value});
-    }
-
-    const login = async (e) => {
-        e.preventDefault()
-        const res = await AuthService.login(fields.email,fields.password);
+    const login = async ({email, password}) => {
+        const res = await AuthService.login(email,password);
         if (res) {
             setErrors(res.errors);
         }
@@ -29,11 +25,8 @@ function Login() {
                 <div className="col-md-8">
                     <div className="card text-center">
                         <div className="card-header"><h2>Connexion</h2></div>
-                        <form onSubmit={login}>
-                            <input name="email" placeholder="Adresse mail" type="text" onChange={handleChange} value={fields.email}/><br/>
-                            <input name="password" placeholder="Mot de passe" type="password" onChange={handleChange} value={fields.password}/><br/>
-                            <input type="submit" value="Connexion"/>
-                        </form>
+                        <Form onSubmit={login} submitLabel="Connexion" model={loginModel}>
+                        </Form>
                         {
                             FormService.displayErrors(errors)
                         }
