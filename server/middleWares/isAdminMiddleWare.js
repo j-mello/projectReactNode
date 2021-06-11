@@ -1,4 +1,3 @@
-const JWTMiddleWare = require("./JWTMiddleWare");
 const User = require("../models/sequelize/User");
 const {sendErrors} = require("../lib/utils");
 
