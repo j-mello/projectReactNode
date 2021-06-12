@@ -3,18 +3,14 @@ import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import { useState } from "react";
 import Form from "./Form";
+import LoginForm from "../forms/LoginForm";
 
 function Login() {
 
-    const loginModel = {
-        email: { type: 'email', label: 'Votre adresse mail'},
-        password: { type: 'password', label: 'Votre mot de passe'}
-    };
-
     const [ errors, setErrors ] = useState([])
 
-    const login = async ({email, password}) => {
-        const res = await AuthService.login(email,password);
+    const login = async (values) => {
+        const res = await AuthService.login(values);
         if (res) {
             setErrors(res.errors);
         }
@@ -25,7 +21,7 @@ function Login() {
                 <div className="col-md-8">
                     <div className="card text-center">
                         <div className="card-header"><h2>Connexion</h2></div>
-                        <Form onSubmit={login} submitLabel="Connexion" model={loginModel}>
+                        <Form onSubmit={login} submitLabel="Connexion" model={LoginForm}>
                         </Form>
                         {
                             FormService.displayErrors(errors)

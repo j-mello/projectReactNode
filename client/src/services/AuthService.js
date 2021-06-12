@@ -1,12 +1,13 @@
+import FormService from "./FormService";
+
 const apiUrl = "http://"+window.location.hostname+":3001";
 
 class AuthService {
-    static async login(email,password) {
-        const args = "email="+email+"&password="+password;
+    static async login(values) {
 
-        let res = await fetch(apiUrl+'/login?'+args, {
+        let res = await fetch(apiUrl+'/login?'+FormService.generateUrlEncodedBody(values), {
             method: "GET",
-        }).then(res => res.statusText === "Unauthorized" ? {errors: ["Unauthorized"]} : res.json());
+        }).then(res => res.status !== 200 ? {errors: [res.statusText]} : res.json());
 
         if (res.access_token) {
             localStorage.setItem("user", JSON.stringify(res));
@@ -16,22 +17,17 @@ class AuthService {
         }
     }
 
-    static async register(name,email,password,password_confirmation) {
-        let formData = new FormData();
-        formData.append("name",name);
-        formData.append("email",email);
-        formData.append("password", password);
-        formData.append("password_confirmation", password_confirmation);
+    static async registerSeller(values) {
 
-        let res = await fetch(apiUrl+'/api/auth/register', {
+        let res = await fetch(apiUrl+'/sellers/register', {
             method: "POST",
-            body: formData
-        }).then(res => res.json());
-        if (typeof(res) === "string") {
-            res = JSON.parse(res);
-        }
-        if (res.user) {
-            this.login(email,password);
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: FormService.generateUrlEncodedBody(values)
+        }).then(res => res.status !== 200 ? res.json() : 200);
+        if (res === 200) {
+            return {success: true}
         } else {
             return res;
         }

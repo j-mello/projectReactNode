@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Link} from "react-router-dom";
 import AuthService from "./services/AuthService";
 import Index from "./components/Index";
 import Login from "./components/Login";
+import RegisterSeller from "./components/RegisterSeller";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -29,7 +30,7 @@ function App() {
                           <Link className="nav-link active" aria-current="page" to="/login">Se connecter</Link>
                         </li>
                         <li className="nav-item">
-                          <Link className="nav-link active" aria-current="page" to="/register">S'inscrire</Link>
+                          <Link className="nav-link active" aria-current="page" to="/register-seller">S'inscrire (marchant)</Link>
                         </li>
                       </ul>)
                       :
@@ -46,6 +47,7 @@ function App() {
         <main>
             <Route exact path="/" component={Index}/>
             <Route exact path="/login" component={Login}/>
+            <Route exact path="/register-seller" component={RegisterSeller}/>
         </main>
 
       </BrowserRouter>

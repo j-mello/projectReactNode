@@ -6,7 +6,6 @@ const { sendErrors } = require("../lib/utils");
 const JWTMiddleWare = require("../middleWares/JWTMiddleWare");
 const isAdminMiddleWare = require("../middleWares/isAdminMiddleWare");
 
-
 router.post("/register", async (req, res) => {
     const {siren,society,urlRedirectConfirm,urlRedirectCancel,currency} = req.body;
     const {email,password,numPhone} = req.body;
