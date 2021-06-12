@@ -32,14 +32,16 @@ router.use(JWTMiddleWare);
 router.use(isAdminMiddleWare);
 
 router.get("/", (req, res) => {
-   Seller.findAll()
+   Seller.findAll({order: [
+           ['id', 'ASC']
+       ]})
        .then(sellers => res.json(sellers))
        .catch(e => sendErrors(req, res, e))
 });
 
 router.post("/valid/:id", (req, res) => {
     Seller.findOne({
-        where: { id: req.params.id, validated: false },
+        where: { id: req.params.id, validated: false }
     })
         .catch(e => sendErrors(req,res,e))
         .then(seller => {

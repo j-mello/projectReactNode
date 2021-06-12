@@ -21,7 +21,7 @@ class FormService {
     }
 
     static generateFormData(values) {
-        let formData = new FormData;
+        let formData = new FormData();
         for (const attr in values) {
             formData.append(attr,values[attr]);
         }
