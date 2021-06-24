@@ -5,6 +5,7 @@ import AuthService from "./services/AuthService";
 import Index from "./components/Index";
 import Login from "./components/Login";
 import RegisterSeller from "./components/RegisterSeller";
+import SellerInfos from "./components/SellerInfos";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -13,7 +14,7 @@ function App() {
         <header>
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
-              <a className="navbar-brand" href="#">Navbar scroll</a>
+              <a className="navbar-brand">Navbar scroll</a>
               <div className="collapse navbar-collapse" id="navbarScroll">
                 <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
                   <li className="nav-item">
@@ -35,6 +36,12 @@ function App() {
                       </ul>)
                       :
                       (<ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
+                          {
+                              user.Seller != null &&
+                              <li className="nav-item">
+                                  <Link className="nav-link active" aria-current="page" to="/infos">Informations</Link>
+                              </li>
+                          }
                         <li className="nav-item">
                           <a className="nav-link active" aria-current="page" href="#" onClick={() => AuthService.logout()}>Se déconnecter</a>
                         </li>
@@ -48,6 +55,7 @@ function App() {
             <Route exact path="/" component={Index}/>
             <Route exact path="/login" component={Login}/>
             <Route exact path="/register-seller" component={RegisterSeller}/>
+            <Route exact path="/infos" component={SellerInfos}/>
         </main>
 
       </BrowserRouter>

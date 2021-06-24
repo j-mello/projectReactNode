@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import SellerService from "../services/SellerService";
 
 export default function Index() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
     const [sellers, setSellers] = useState([]);
     const [errors, setErrors] = useState([]);
-
-    const user = JSON.parse(localStorage.getItem("user"));
+    const [sellerToDisplay, setSellerToDisplay] = useState(user && user.Seller ? user.Seller : null);
 
     const getAllSellers = () => {
         SellerService.getSellers(user.access_token)
@@ -14,7 +15,7 @@ export default function Index() {
     }
 
     useEffect(() => {
-        if (user != null) {
+        if (user != null && user.Seller == null) {
             getAllSellers();
         }
     }, [])
@@ -33,7 +34,7 @@ export default function Index() {
                     <h1>Vous n'êtes pas connecté</h1>
             }
             {
-                user != null && user.Seller == null &&
+                user != null && user.Seller == null && sellerToDisplay == null &&
                     <>
                         <h1>Voici la liste des marchants :</h1>
                         <table>
@@ -76,6 +77,12 @@ export default function Index() {
                                 )
                             }
                         </ul>
+                    </>
+            }
+            {
+                user != null && sellerToDisplay != null &&
+                    <>
+                        <h1>Vous êtes marchand de la société {sellerToDisplay.society}</h1>
                     </>
             }
         </div>

@@ -4,7 +4,7 @@ import FormService from "../services/FormService";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
 import Form from "./Form";
-import RegisterForm from "../forms/RegisterForm";
+import SellerForm from "../forms/SellerForm";
 
 function RegisterSeller() {
 
@@ -29,7 +29,7 @@ function RegisterSeller() {
                 <div className="col-md-8">
                     <div className="card text-center">
                         <div className="card-header"><h2>Inscription marchant</h2></div>
-                        <Form onSubmit={register} submitLabel="S'inscrire" model={RegisterForm}>
+                        <Form onSubmit={register} submitLabel="S'inscrire" model={SellerForm()}>
                         </Form>
                         {
                             Array.isArray(errorsOrSuccess) &&
