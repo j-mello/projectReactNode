@@ -50,19 +50,22 @@ export default function Index() {
                             </thead>
                             <tbody>
                             {
-                                sellers.map(seller =>
-                                    <tr key={seller.id}>
-                                        <td>{seller.siren}</td>
-                                        <td>{seller.society}</td>
-                                        <td>{seller.urlRedirectConfirm}</td>
-                                        <td>{seller.urlRedirectCancel}</td>
-                                        <td>{seller.currency}</td>
-                                        {
-                                            !seller.validated &&
-                                            <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/></td>
-                                        }
-                                    </tr>
-                                )
+                                sellers.length > 0 ?
+                                    sellers.map(seller =>
+                                        <tr key={seller.id}>
+                                            <td>{seller.siren}</td>
+                                            <td>{seller.society}</td>
+                                            <td>{seller.urlRedirectConfirm}</td>
+                                            <td>{seller.urlRedirectCancel}</td>
+                                            <td>{seller.currency}</td>
+                                            {
+                                                !seller.validated &&
+                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/></td>
+                                            }
+                                        </tr>
+                                    ) :
+                                    <h2>Aucun marchand trouvé</h2>
+
                             }
                             </tbody>
                         </table>
