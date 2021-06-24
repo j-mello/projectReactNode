@@ -1,7 +1,7 @@
 const express = require("express");
 const UserRouter = require("./routes/UserRouter");
 const SecurityRouter = require("./routes/SecurityRouter");
-const SellerController = require("./routes/SellerController");
+const SellerRouter = require("./routes/SellerRouter");
 const mustacheExpress = require("mustache-express");
 const migrate = require("./lib/sequalizeloader");
 const cors = require('cors');
@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 app.use("/users", UserRouter);
-app.use("/sellers", SellerController);
-app.use("/", SecurityRouter);
+app.use("/sellers", SellerRouter);
+app.use("/auth", SecurityRouter);
 
 app.listen(process.env.PORT || 3000, () => console.log("server listening"));

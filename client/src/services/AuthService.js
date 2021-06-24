@@ -1,6 +1,6 @@
 import FormService from "./FormService";
 
-const apiUrl = "http://"+window.location.hostname+":3001";
+const apiUrl = "http://"+window.location.hostname+":3001/auth";
 
 class AuthService {
     static async login(values) {
@@ -19,7 +19,7 @@ class AuthService {
 
     static async registerSeller(values) {
 
-        let res = await fetch(apiUrl+'/sellers/register', {
+        let res = await fetch(apiUrl+'/register-seller', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
