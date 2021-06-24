@@ -74,6 +74,17 @@ router.put('/edit', (req, res) => {
         .catch(e => sendErrors(req,res,e));
 });
 
+router.put('/editPassword', (req,res) => {
+   const {password, password_confirm} = req.body;
+   if (password === undefined || password !== password_confirm) {
+       res.sendStatus(400);
+       return;
+   }
+   User.update({password}, {where: {id: req.user.id}})
+       .then(_ => res.sendStatus(200))
+       .catch(e => sendErrors(req,res,e));
+});
+
 
 
 module.exports = router;
