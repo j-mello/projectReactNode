@@ -64,7 +64,7 @@ export default function Index() {
                                             }
                                         </tr>
                                     ) :
-                                    <h2>Aucun marchand trouvé</h2>
+                                    <tr><td colSpan="6" style={{textAlign: "center"}}>Aucun marchand trouvé</td></tr>
 
                             }
                             </tbody>
