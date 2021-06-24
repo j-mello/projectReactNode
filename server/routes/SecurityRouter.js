@@ -24,6 +24,7 @@ router.get("/login", (req,res) => {
         .catch(e => sendErrors(req,res,e));
 });
 
+
 router.use(JWTMiddleWare);
 
 router.get("/test", (req,res) => {

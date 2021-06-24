@@ -12,6 +12,8 @@ module.exports = class CreateAdmin extends Command {
     }
 
     static async action(args) {
+        args.password = args.password.toString();
+
         const user = new User(args);
 
         try {
@@ -19,7 +21,7 @@ module.exports = class CreateAdmin extends Command {
             console.log("Utilisateur créé avec succès!");
         } catch(e) {
             console.log("Echec de création de l'utilisateur : ");
-            console.log(e.errors.map(error => error.message).join("\n"));
+            console.log(e.errors ? e.errors.map(error => error.message).join("\n") : e.message);
         }
     }
 

@@ -6,7 +6,6 @@ const { sendErrors } = require("../lib/utils");
 const JWTMiddleWare = require("../middleWares/JWTMiddleWare");
 const isAdminMiddleWare = require("../middleWares/isAdminMiddleWare");
 
-
 router.post("/register", async (req, res) => {
     const {siren,society,urlRedirectConfirm,urlRedirectCancel,currency} = req.body;
     const {email,password,numPhone} = req.body;
@@ -33,14 +32,16 @@ router.use(JWTMiddleWare);
 router.use(isAdminMiddleWare);
 
 router.get("/", (req, res) => {
-   Seller.findAll()
+   Seller.findAll({order: [
+           ['id', 'ASC']
+       ]})
        .then(sellers => res.json(sellers))
        .catch(e => sendErrors(req, res, e))
 });
 
 router.post("/valid/:id", (req, res) => {
     Seller.findOne({
-        where: { id: req.params.id, validated: false },
+        where: { id: req.params.id, validated: false }
     })
         .catch(e => sendErrors(req,res,e))
         .then(seller => {

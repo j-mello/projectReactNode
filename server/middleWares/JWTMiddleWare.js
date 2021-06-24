@@ -9,7 +9,7 @@ const extractBearerToken = headerValue => {
     return matches && matches[2]
 }
 
-const  JWTMiddleWare = (req, res, next) => {
+const JWTMiddleWare = (req, res, next) => {
     const token = req.query.token || req.body.token || (req.headers.authorization && extractBearerToken(req.headers.authorization));
 
     if (!token) {
