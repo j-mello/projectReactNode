@@ -33,6 +33,16 @@ class AuthService {
         }
     }
 
+    static edit(values,token) {
+        return fetch(apiUrl+"/edit", {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: FormService.generateUrlEncodedBody({...values, token})
+        }).then(res => res.status !== 200 ? {errors: [res.statusText]} : {success: true});
+    }
+
     static logout = async () => {
         if (localStorage.getItem("user") == null) {
             alert("Vous êtes déjà déconnecté!");

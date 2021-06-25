@@ -5,7 +5,7 @@ import AuthService from "./services/AuthService";
 import Index from "./components/Index";
 import Login from "./components/Login";
 import RegisterSeller from "./components/RegisterSeller";
-import SellerInfos from "./components/SellerInfos";
+import Infos from "./components/Infos";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -55,7 +55,7 @@ function App() {
             <Route exact path="/" component={Index}/>
             <Route exact path="/login" component={Login}/>
             <Route exact path="/register-seller" component={RegisterSeller}/>
-            <Route exact path="/infos" component={SellerInfos}/>
+            <Route exact path="/infos" component={Infos}/>
         </main>
 
       </BrowserRouter>
