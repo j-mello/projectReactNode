@@ -23,7 +23,7 @@ export default function Index() {
     const validSeller = sellerToValid =>
         SellerService.validSeller(user.access_token,sellerToValid.id).then(res =>
             res.errors ? setErrors(res.errors) : setSellers(sellers.map(seller =>
-                seller.id === sellerToValid.id ? {...sellerToValid, validated: true} : seller
+                seller.id === sellerToValid.id ? {...sellerToValid, ClientCredentialClientId: true} : seller
             ))
         )
 
@@ -60,7 +60,7 @@ export default function Index() {
                                             <td>{seller.urlRedirectCancel}</td>
                                             <td>{seller.currency}</td>
                                             {
-                                                !seller.validated &&
+                                                !seller.ClientCredentialClientId &&
                                                 <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/></td>
                                             }
                                         </tr>

@@ -1,3 +1,4 @@
+const {Op} = require("sequelize");
 const User = require("../models/sequelize/User");
 const {sendErrors} = require("../lib/utils");
 
@@ -8,11 +9,12 @@ module.exports = function checkRoleMiddleWare(role = "admin") {
         if (!req.user) {
             return res.sendStatus(401);
         }
-        User.findOne({where: { id: req.user.id }})
+        User.findOne({where: {
+            id: req.user.id,
+            ...(role === "admin" ? {SellerId: {[Op.is]: null}} : {SellerId: {[Op.ne]: null}})
+        }})
             .then(user =>
-                user == null ||
-                (role === "admin" && user.SellerId != null) ||
-                (role === "seller" && user.SellerId == null) ?
+                user == null ?
                     res.sendStatus(401) :
                     next()
             )

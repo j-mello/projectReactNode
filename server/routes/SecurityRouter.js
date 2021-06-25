@@ -2,6 +2,7 @@ const { Router } = require("express");
 const JWTMiddleWare = require("../middleWares/JWTMiddleWare");
 const User = require("../models/sequelize/User");
 const Seller = require("../models/sequelize/Seller");
+const ClientCredential = require("../models/sequelize/ClientCredential");
 const jwt = require('jsonwebtoken');
 const { sendErrors } = require("../lib/utils");
 const bcrypt = require("bcryptjs");
@@ -32,9 +33,12 @@ router.post("/register-seller", async (req, res) => {
 
 router.get("/login", (req,res) => {
     let {password, email} = req.query;
-    User.findOne({where: {email}, include: Seller})
+    User.findOne({
+        where: {email},
+        include: {model: Seller, include: ClientCredential}
+    })
         .then(async user =>
-            user == null || !(await bcrypt.compare(password,user.password)) || (user.Seller != null && !user.Seller.validated) ?
+            user == null || !(await bcrypt.compare(password,user.password)) || (user.Seller != null && user.Seller.ClientCredential == null) ?
                 res.sendStatus(401) :
                 res.json({
                     ...user.dataValues,
