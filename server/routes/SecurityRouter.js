@@ -45,7 +45,6 @@ router.get("/login", (req,res) => {
                     access_token: jwt.sign({
                         id: user.id,
                         email: user.email,
-                        role: user.Seller == null ? "admin" : "seller",
                         ...(user.Seller != null && {sellerId: user.Seller.id})
                     }, process.env.JWT_SECRET, { expiresIn: '3 hours' })
                 }))
@@ -63,7 +62,7 @@ router.put('/edit', (req, res) => {
             where: {id: req.user.id}
         })
         .then(_ =>
-            req.user.role === "admin" ?
+            req.user.sellerId === null ?
                 res.sendStatus(200) :
                 Seller.update(
                     {

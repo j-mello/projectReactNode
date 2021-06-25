@@ -1,5 +1,6 @@
 import React from 'react';
 import Form from "./Form";
+import Credentials from "./Credentials";
 import SellerForm from "../forms/SellerForm";
 import AuthService from "../services/AuthService";
 import { useState } from "react";
@@ -8,7 +9,6 @@ import PasswordForm from "../forms/PasswordForm";
 
 function Infos() {
 	const user = JSON.parse(localStorage.getItem("user"));
-
 	const [successOrErrors, setSuccessOrErrors] = useState(null);
 	const [successOrErrorsPassword, setSuccessOrErrorsPassword] = useState(null);
 
@@ -44,31 +44,34 @@ function Infos() {
 		}
 	}
 
-	return <div>
-		<h1>Vos informations personnelles</h1>
-		<Form model={SellerForm(false)} dataValues={{...user.Seller, ...user}} submitLabel="Modifier" onSubmit={changeSellerInfos}>
-		</Form>
-		{
-			successOrErrors === true &&
+	return (
+		<div>
+			<h1>Vos informations personnelles</h1>
+			<Form model={SellerForm(false)} dataValues={{...user.Seller, ...user}} submitLabel="Modifier" onSubmit={changeSellerInfos}>
+			</Form>
+			{
+				successOrErrors === true &&
 				<p style={{color: 'green'}}>Informations modifiées avec succès!</p>
-		}
-		{
-			successOrErrors instanceof Array &&
+			}
+			{
+				successOrErrors instanceof Array &&
 				FormService.displayErrors(successOrErrors)
-		}
+			}
 
-		<h2>Modifier votre mot de passe</h2>
-		<Form model={PasswordForm()} submitLabel="Modifier" onSubmit={changePassword}>
-		</Form>
-		{
-			successOrErrorsPassword === true &&
-			<p style={{color: 'green'}}>Mot de passe modifié avec succès!</p>
-		}
-		{
-			successOrErrorsPassword instanceof Array &&
-			FormService.displayErrors(successOrErrorsPassword)
-		}
-	</div>
+			<h2>Modifier votre mot de passe</h2>
+			<Form model={PasswordForm()} submitLabel="Modifier" onSubmit={changePassword}>
+			</Form>
+			{
+				successOrErrorsPassword === true &&
+				<p style={{color: 'green'}}>Mot de passe modifié avec succès!</p>
+			}
+			{
+				successOrErrorsPassword instanceof Array &&
+				FormService.displayErrors(successOrErrorsPassword)
+			}
+			<Credentials>
+			</Credentials>
+		</div>)
 }
 
 export default Infos;

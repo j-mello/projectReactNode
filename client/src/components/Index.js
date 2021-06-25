@@ -20,8 +20,8 @@ export default function Index() {
         }
     }, [])
 
-    const validSeller = sellerToValid =>
-        SellerService.validSeller(user.access_token,sellerToValid.id).then(res =>
+    const reGenerateCredentials = sellerToValid =>
+        SellerService.reGenerateCredentials(user.access_token,sellerToValid.id).then(res =>
             res.errors ? setErrors(res.errors) : setSellers(sellers.map(seller =>
                 seller.id === sellerToValid.id ? {...sellerToValid, ClientCredentialClientId: true} : seller
             ))
@@ -40,6 +40,7 @@ export default function Index() {
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Id</th>
                                     <th>Siren</th>
                                     <th>Société</th>
                                     <th>Url de redirection</th>
@@ -54,6 +55,7 @@ export default function Index() {
                                 sellers.length > 0 ?
                                     sellers.map(seller =>
                                         <tr key={seller.id}>
+                                            <td>{seller.id}</td>
                                             <td>{seller.siren}</td>
                                             <td>{seller.society}</td>
                                             <td>{seller.urlRedirectConfirm}</td>
@@ -61,7 +63,7 @@ export default function Index() {
                                             <td>{seller.currency}</td>
                                             {
                                                 !seller.ClientCredentialClientId &&
-                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/></td>
+                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && reGenerateCredentials(seller)}/></td>
                                             }
                                         </tr>
                                     ) :
