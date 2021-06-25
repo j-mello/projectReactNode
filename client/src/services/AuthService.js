@@ -7,9 +7,10 @@ class AuthService {
 
         let res = await fetch(apiUrl+'/login?'+FormService.generateUrlEncodedBody(values), {
             method: "GET",
-        }).then(res => res.status !== 200 ? {errors: [res.statusText]} : res.json());
+        }).then(res => FormService.parseServerResponse(res));
 
-        if (res.access_token) {
+        if (res.success) {
+            delete res.success;
             localStorage.setItem("user", JSON.stringify(res));
             window.location.href = "/";
         } else {
@@ -17,20 +18,24 @@ class AuthService {
         }
     }
 
-    static async registerSeller(values) {
-
-        let res = await fetch(apiUrl+'/register-seller', {
+    static registerSeller(values) {
+        return fetch(apiUrl+'/register-seller', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
             },
             body: FormService.generateUrlEncodedBody(values)
-        }).then(res => res.status !== 200 ? res.json() : 200);
-        if (res === 200) {
-            return {success: true}
-        } else {
-            return res;
-        }
+        }).then(res => FormService.parseServerResponse(res));
+    }
+
+    static editPassword(values,token) {
+        return fetch(apiUrl+"/editPassword", {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: FormService.generateUrlEncodedBody({...values, token})
+        }).then(res => FormService.parseServerResponse(res));
     }
 
     static edit(values,token) {
@@ -40,7 +45,7 @@ class AuthService {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
             },
             body: FormService.generateUrlEncodedBody({...values, token})
-        }).then(res => res.status !== 200 ? {errors: [res.statusText]} : {success: true});
+        }).then(res => FormService.parseServerResponse(res));
     }
 
     static logout = async () => {

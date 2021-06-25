@@ -11,7 +11,7 @@ function Login() {
 
     const login = async (values) => {
         const res = await AuthService.login(values);
-        if (res) {
+        if (res && res.errors) {
             setErrors(res.errors);
         }
     }
