@@ -6,6 +6,8 @@ const ClientCredential = require("../models/sequelize/ClientCredential");
 const jwt = require('jsonwebtoken');
 const { sendErrors } = require("../lib/utils");
 const bcrypt = require("bcryptjs");
+const oauth2Server = require("../lib/Oauth2Server");
+const {oneOf} = require("express-validator");
 
 const router = Router();
 
@@ -51,9 +53,6 @@ router.get("/login", (req,res) => {
         .catch(e => sendErrors(req,res,e));
 });
 
-
-router.use(JWTMiddleWare);
-
 router.put('/edit', (req, res) => {
     const {siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone} = req.body;
     User.update(
@@ -88,6 +87,12 @@ router.put('/editPassword', (req,res) => {
        .catch(e => sendErrors(req,res,e));
 });
 
+router.post("/login-oauth2", oauth2Server.grant())
 
+router.use(oauth2Server.authorise());
+
+router.get("/test", (req,res) => {
+    res.send("test");
+});
 
 module.exports = router;

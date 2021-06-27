@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const oauth2Server = require('../lib/Oauth2Server');
 
 const extractBearerToken = headerValue => {
     if (typeof headerValue !== 'string') {

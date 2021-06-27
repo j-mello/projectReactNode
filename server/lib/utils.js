@@ -12,7 +12,7 @@ exports.sendErrors = (req,res,e) => {
 }
 
 exports.generateClientIdAndClientSecret = (n) => {
-    const chars = "azertyuiopqsdfghjklmwxcvbn0123456789$!?%&";
+    const chars = "azertyuiopqsdfghjklmwxcvbn0123456789";
     let token = "";
     for (let i=0;i<n;i++) {
         token += chars[rand(0,chars.length-1)];
