@@ -11,7 +11,7 @@ function Login() {
 
     const login = async (values) => {
         const res = await AuthService.login(values);
-        if (res) {
+        if (res && res.errors) {
             setErrors(res.errors);
         }
     }
@@ -21,7 +21,7 @@ function Login() {
                 <div className="col-md-8">
                     <div className="card text-center">
                         <div className="card-header"><h2>Connexion</h2></div>
-                        <Form onSubmit={login} submitLabel="Connexion" model={LoginForm}>
+                        <Form onSubmit={login} submitLabel="Connexion" model={LoginForm()}>
                         </Form>
                         {
                             FormService.displayErrors(errors)

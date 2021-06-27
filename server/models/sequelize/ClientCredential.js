@@ -1,13 +1,13 @@
 const {Model, DataTypes} = require("sequelize");
 const conn = require("../../lib/sequelize");
-const User = require("./User")
+const Seller = require("./Seller")
 
 class ClientCredential extends Model {}
 
 ClientCredential.init(
     {
-        cliendId: {
-            type: DataTypes.INTEGER,
+        clientId: {
+            type: DataTypes.STRING,
             primaryKey: true,
             allowNull: false
         },
@@ -22,7 +22,7 @@ ClientCredential.init(
     }
 );
 
-ClientCredential.belongsTo(User)
-User.hasOne(ClientCredential)
+ClientCredential.hasOne(Seller)
+Seller.belongsTo(ClientCredential)
 
 module.exports = ClientCredential;

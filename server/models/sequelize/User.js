@@ -33,11 +33,16 @@ User.init(
 );
 
 const updatePassword = async (user) => {
-    if (user._previousDataValues.password !== user.dataValues.password)
-        user.password = await bcrypt.hash(user.password, await bcrypt.genSalt());
+    if ((user.type === "BULKUPDATE" && user.fields.includes('password')) ||
+        (user.type === undefined && user._previousDataValues.password !== user.dataValues.password)) {
+
+        const attributes = user.type === "BULKUPDATE" ? user.attributes : user;
+        attributes.password = await bcrypt.hash(attributes.password, await bcrypt.genSalt());
+    }
 };
 
 User.addHook("beforeCreate", updatePassword);
+User.addHook("beforeBulkUpdate", updatePassword);
 User.addHook("beforeUpdate", updatePassword);
 
 module.exports = User;

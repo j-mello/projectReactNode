@@ -31,12 +31,7 @@ Seller.init(
     currency: {
         type: DataTypes.STRING,
         allowNull: false
-    },
-    validated:  {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false
-    },
+    }
   },
   {
     sequelize: conn,

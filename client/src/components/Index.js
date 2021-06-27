@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import SellerService from "../services/SellerService";
 
 export default function Index() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
     const [sellers, setSellers] = useState([]);
     const [errors, setErrors] = useState([]);
-
-    const user = JSON.parse(localStorage.getItem("user"));
+    const [sellerToDisplay, setSellerToDisplay] = useState(user && user.Seller ? user.Seller : null);
 
     const getAllSellers = () => {
         SellerService.getSellers(user.access_token)
@@ -14,15 +15,15 @@ export default function Index() {
     }
 
     useEffect(() => {
-        if (user != null) {
+        if (user != null && user.Seller == null) {
             getAllSellers();
         }
     }, [])
 
-    const validSeller = sellerToValid =>
-        SellerService.validSeller(user.access_token,sellerToValid.id).then(res =>
+    const reGenerateCredentials = sellerToValid =>
+        SellerService.reGenerateCredentials(user.access_token,sellerToValid.id).then(res =>
             res.errors ? setErrors(res.errors) : setSellers(sellers.map(seller =>
-                seller.id === sellerToValid.id ? {...sellerToValid, validated: true} : seller
+                seller.id === sellerToValid.id ? {...sellerToValid, ClientCredentialClientId: true} : seller
             ))
         )
 
@@ -33,12 +34,13 @@ export default function Index() {
                     <h1>Vous n'êtes pas connecté</h1>
             }
             {
-                user != null && user.Seller == null &&
+                user != null && user.Seller == null && sellerToDisplay == null &&
                     <>
                         <h1>Voici la liste des marchants :</h1>
                         <table>
                             <thead>
                                 <tr>
+                                    <th>Id</th>
                                     <th>Siren</th>
                                     <th>Société</th>
                                     <th>Url de redirection</th>
@@ -53,14 +55,15 @@ export default function Index() {
                                 sellers.length > 0 ?
                                     sellers.map(seller =>
                                         <tr key={seller.id}>
+                                            <td>{seller.id}</td>
                                             <td>{seller.siren}</td>
                                             <td>{seller.society}</td>
                                             <td>{seller.urlRedirectConfirm}</td>
                                             <td>{seller.urlRedirectCancel}</td>
                                             <td>{seller.currency}</td>
                                             {
-                                                !seller.validated &&
-                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/></td>
+                                                !seller.ClientCredentialClientId &&
+                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && reGenerateCredentials(seller)}/></td>
                                             }
                                         </tr>
                                     ) :
@@ -76,6 +79,12 @@ export default function Index() {
                                 )
                             }
                         </ul>
+                    </>
+            }
+            {
+                user != null && sellerToDisplay != null &&
+                    <>
+                        <h1>Vous êtes marchand de la société {sellerToDisplay.society}</h1>
                     </>
             }
         </div>

@@ -28,6 +28,20 @@ class FormService {
         return formData;
     }
 
+    static async parseServerResponse(res) {
+        let json = null;
+        try {
+            json = await res.json();
+        } catch (e){}
+        if (res.status === 200) {
+            return {...json, success: true};
+        }
+        if (json && json.errors) {
+            return json;
+        }
+        return {errors: [res.statusText]}
+    }
+
 
 }
 
