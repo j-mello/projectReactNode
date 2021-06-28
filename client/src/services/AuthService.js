@@ -5,8 +5,12 @@ const apiUrl = "http://"+window.location.hostname+":3001/auth";
 class AuthService {
     static async login(values) {
 
-        let res = await fetch(apiUrl+'/login?'+FormService.generateUrlEncodedBody(values), {
-            method: "GET",
+        let res = await fetch(apiUrl+'/login', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body: FormService.generateUrlEncodedBody(values)
         }).then(res => FormService.parseServerResponse(res));
 
         if (res.success) {

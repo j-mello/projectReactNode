@@ -1,6 +1,8 @@
 const { Router } = require("express");
-const JWTMiddleWare = require("../middleWares/JWTMiddleWare");
+const checkTokenMiddleWare = require("../middleWares/checkTokenMiddleWare");
+const {generateAccessToken} = require("../lib/utils");
 const User = require("../models/sequelize/User");
+const Oauth2Token = require("../models/sequelize/Oauth2Token");
 const Seller = require("../models/sequelize/Seller");
 const ClientCredential = require("../models/sequelize/ClientCredential");
 const jwt = require('jsonwebtoken');
@@ -31,8 +33,8 @@ router.post("/register-seller", async (req, res) => {
         .catch(e => sendErrors(req,res,e))
 });
 
-router.get("/login", (req,res) => {
-    let {password, email} = req.query;
+router.post("/login", (req,res) => {
+    let {password, email} = req.body;
     User.findOne({
         where: {email},
         include: {model: Seller, include: ClientCredential}
@@ -51,41 +53,78 @@ router.get("/login", (req,res) => {
         .catch(e => sendErrors(req,res,e));
 });
 
-
-router.use(JWTMiddleWare);
-
-router.put('/edit', (req, res) => {
-    const {siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone} = req.body;
-    User.update(
-        {numPhone},
-        {
-            where: {id: req.user.id}
-        })
-        .then(_ =>
-            req.user.sellerId === null ?
-                res.sendStatus(200) :
-                Seller.update(
-                    {
-                        siren,society,urlRedirectConfirm,urlRedirectCancel,currency
-                    },
-                    {
-                        where: {id: req.user.sellerId}
-                    })
-                    .then(_ => res.sendStatus(200))
+router.post("/login-oauth2", (req, res) => {
+    const expires_in = 3600;
+    const {clientId,clientSecret,grant_type} = req.body;
+    if (clientId === undefined || clientSecret === undefined || grant_type !== "client_credentials") {
+        res.sendStatus(400);
+        return;
+    }
+    ClientCredential.findOne({
+        where: {clientId,clientSecret},
+        include: Seller
+    })
+        .then(clientCredential => {
+            if (clientCredential == null)
+                res.sendStatus(401)
+            else {
+                const accessToken = generateAccessToken();
+                let expires = new Date().setTime(new Date().getTime()+expires_in*1000);
+                new Oauth2Token({
+                    accessToken,
+                    expires,
+                    SellerId: clientCredential.Seller.id
+                }).save()
+                    .then(_ => res.status(200).json({
+                        accessToken,
+                        expires_in
+                    }))
                     .catch(e => sendErrors(req,res,e))
-        )
+            }
+        })
+        .catch(e => sendErrors(req,res,e))
+})
+
+router.put('/editPassword', checkTokenMiddleWare('jwt'), (req,res) => {
+    const {password, password_confirm} = req.body;
+    if (password === undefined || password !== password_confirm) {
+        res.sendStatus(400);
+        return;
+    }
+    User.update({password}, {where: {id: req.user.id}})
+        .then(_ => res.sendStatus(200))
         .catch(e => sendErrors(req,res,e));
 });
 
-router.put('/editPassword', (req,res) => {
-   const {password, password_confirm} = req.body;
-   if (password === undefined || password !== password_confirm) {
-       res.sendStatus(400);
-       return;
-   }
-   User.update({password}, {where: {id: req.user.id}})
-       .then(_ => res.sendStatus(200))
-       .catch(e => sendErrors(req,res,e));
+router.use(checkTokenMiddleWare());
+
+router.put('/edit', async (req, res) => {
+    const {siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone} = req.body;
+    try {
+        if (req.user) {
+            await User.update(
+                {numPhone},
+                {
+                    where: {id: req.user.id}
+                });
+            if (req.user.sellerId === null) {
+                res.sendStatus(200);
+                return;
+            }
+        }
+        if ((req.user && req.user.sellerId) || req.seller) {
+            await Seller.update(
+                {
+                    siren, society, urlRedirectConfirm, urlRedirectCancel, currency
+                },
+                {
+                    where: {id: req.user ? req.user.sellerId : req.seller.id}
+                });
+            res.sendStatus(200);
+        }
+    } catch (e) {
+        sendErrors(req,res,e);
+    }
 });
 
 
