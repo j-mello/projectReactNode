@@ -85,7 +85,9 @@ router.post("/login-oauth2", (req, res) => {
         .catch(e => sendErrors(req,res,e))
 })
 
-router.put('/editPassword', checkTokenMiddleWare('jwt'), (req,res) => {
+router.use(checkTokenMiddleWare('jwt'));
+
+router.put('/editPassword', (req,res) => {
     const {password, password_confirm} = req.body;
     if (password === undefined || password !== password_confirm) {
         res.sendStatus(400);
@@ -96,35 +98,27 @@ router.put('/editPassword', checkTokenMiddleWare('jwt'), (req,res) => {
         .catch(e => sendErrors(req,res,e));
 });
 
-router.use(checkTokenMiddleWare());
-
 router.put('/edit', async (req, res) => {
     const {siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone} = req.body;
-    try {
-        if (req.user) {
-            await User.update(
-                {numPhone},
-                {
-                    where: {id: req.user.id}
-                });
-            if (req.user.sellerId === null) {
-                res.sendStatus(200);
-                return;
-            }
-        }
-        if ((req.user && req.user.sellerId) || req.seller) {
-            await Seller.update(
-                {
-                    siren, society, urlRedirectConfirm, urlRedirectCancel, currency
-                },
-                {
-                    where: {id: req.user ? req.user.sellerId : req.seller.id}
-                });
-            res.sendStatus(200);
-        }
-    } catch (e) {
-        sendErrors(req,res,e);
-    }
+    User.update(
+        {numPhone},
+        {
+            where: {id: req.user.id}
+        })
+        .then(_ =>
+                req.user.sellerId === null ? res.sendStatus(200) :
+                    Seller.update(
+                        {
+                            siren, society, urlRedirectConfirm, urlRedirectCancel, currency
+                        },
+                        {
+                            where: {id: req.user.sellerId}
+                        }
+                        )
+                        .then(_ => res.sendStatus(200))
+                        .catch(e => sendErrors(req,res,e))
+        )
+        .catch(e => sendErrors(req,res,e));
 });
 
 

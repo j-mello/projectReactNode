@@ -7,12 +7,11 @@ const checkTokenMiddleWare = require("../middleWares/checkTokenMiddleWare");
 const checkRoleMiddleWare = require("../middleWares/checkRoleMiddleWare");
 const {generateRandomString} = require("../lib/utils");
 
-router.use(checkTokenMiddleWare());
+router.use(checkTokenMiddleWare('jwt'));
 
 router.post("/generateCredentials/:id", (req, res) => {
     if (
-        (req.user && req.user.sellerId && req.user.sellerId !== parseInt(req.params.id)) ||
-        (req.seller && req.seller.id !== parseInt(req.params.id))
+        req.user.sellerId && req.user.sellerId !== parseInt(req.params.id)
     ) {
         res.sendStatus(403);
         return;
