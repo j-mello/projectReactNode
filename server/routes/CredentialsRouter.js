@@ -10,7 +10,12 @@ router.use(checkTokenMiddleWare('jwt'));
 router.use(checkRoleMiddleWare('seller'));
 
 router.get("/", (req, res) => {
-    ClientCredential.findAll({where: {SellerId: req.user.sellerId}})
+    ClientCredential.findAll({
+        where: {SellerId: req.user.sellerId},
+        order: [
+            ['id','ASC']
+        ]
+    })
         .then(sellers => res.status(200).json(sellers))
         .catch(e => sendErrors(req,res,e));
 });
@@ -22,13 +27,8 @@ router.post("/", (req,res) => {
 });
 
 router.delete("/:id", (req,res) => {
-    ClientCredential.findAll({where: {SellerId: req.user.sellerId}})
-        .then(credentials => credentials.length === 1 ?
-            res.send(403) :
-            ClientCredential.destroy({where: {SellerId: req.user.sellerId, id: req.params.id}})
-                .then(deleted => deleted === 0 ? res.sendStatus(404) : res.sendStatus(204))
-                .catch(e => sendErrors(req,res,e))
-        )
+    ClientCredential.destroy({where: {SellerId: req.user.sellerId, id: req.params.id}})
+        .then(deleted => deleted === 0 ? res.sendStatus(404) : res.sendStatus(204))
         .catch(e => sendErrors(req,res,e));
 
 });
@@ -46,7 +46,7 @@ router.put("/:id", (req, res) => {
                 SellerId: req.user.sellerId
             }
         })
-        .then(([updated]) => updated > 0 ? res.status(200).json(newCredential) : res.sendStatus(404))
+        .then(([updated]) => updated > 0 ? res.status(200).json({...newCredential, id: req.params.id}) : res.sendStatus(404))
         .catch(e => sendErrors(req,res,e));
 });
 

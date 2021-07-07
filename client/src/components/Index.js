@@ -10,8 +10,7 @@ export default function Index() {
 
     const getAllSellers = () => {
         SellerService.getSellers(user.access_token)
-            .then(res => res.json())
-            .then(sellers => setSellers(sellers));
+            .then(data => data.errors ? setErrors(data.errors) : setSellers(data));
     }
 
     useEffect(() => {

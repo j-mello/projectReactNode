@@ -3,7 +3,7 @@ import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import Form from "./Form";
+import Form from "./lib/Form";
 import SellerForm from "../forms/SellerForm";
 
 function RegisterSeller() {
@@ -15,8 +15,8 @@ function RegisterSeller() {
     const register = async (values) => {
         const res = await AuthService.registerSeller(values);
         if (res) {
-            setErrorsOrSuccess(res.success ? true : res.errors);
-            if (res.success) {
+            setErrorsOrSuccess(res.errors ?? true);
+            if (res.errors === undefined) {
                 setTimeout(() => {
                     history.push("/");
                 }, 500);

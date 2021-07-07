@@ -2,7 +2,7 @@ import React from 'react';
 import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import { useState } from "react";
-import Form from "./Form";
+import Form from "./lib/Form";
 import LoginForm from "../forms/LoginForm";
 
 function Login() {

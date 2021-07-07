@@ -1,18 +1,17 @@
 import React from 'react';
-import Form from "./Form";
+import Form from "./lib/Form";
 import Credentials from "./Credentials";
 import SellerForm from "../forms/SellerForm";
 import AuthService from "../services/AuthService";
-import { useState } from "react";
+import {useState} from "react";
 import FormService from "../services/FormService";
 import PasswordForm from "../forms/PasswordForm";
+import {CredentialsProvider} from "../contexts/CredentialsContext";
 
 function Infos() {
 	const user = JSON.parse(localStorage.getItem("user"));
 	const [successOrErrors, setSuccessOrErrors] = useState(null);
 	const [successOrErrorsPassword, setSuccessOrErrorsPassword] = useState(null);
-
-	if (user == null || user.Seller == null) return;
 
 	const changePassword = async ({password,password_confirm}) => {
 		if (password !== "" && password === password_confirm) {
@@ -69,8 +68,12 @@ function Infos() {
 				successOrErrorsPassword instanceof Array &&
 				FormService.displayErrors(successOrErrorsPassword)
 			}
-			<Credentials>
-			</Credentials>
+			{ user.Seller != null &&
+				<CredentialsProvider>
+					<Credentials>
+					</Credentials>
+				</CredentialsProvider>
+			}
 		</div>)
 }
 

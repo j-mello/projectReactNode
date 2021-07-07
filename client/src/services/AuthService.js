@@ -13,13 +13,13 @@ class AuthService {
             body: FormService.generateUrlEncodedBody(values)
         }).then(res => FormService.parseServerResponse(res));
 
-        if (res.success) {
-            delete res.success;
-            localStorage.setItem("user", JSON.stringify(res));
-            window.location.href = "/";
-        } else {
+        if (res.errors) {
             return res;
         }
+
+        delete res.success;
+        localStorage.setItem("user", JSON.stringify(res));
+        window.location.href = "/";
     }
 
     static registerSeller(values) {
