@@ -7,8 +7,8 @@ export default class SellerService {
         return fetch(apiUrl+'/sellers?token='+token);
     }
 
-    static reGenerateCredentials(token,sellerId) {
-        return fetch(apiUrl+'/sellers/generateCredentials/'+sellerId+'/?token='+token, {
+    static validSeller(token,sellerId) {
+        return fetch(apiUrl+'/sellers/'+sellerId+'/active/?token='+token, {
             method: "POST"
         }).then(res => FormService.parseServerResponse(res));
     }

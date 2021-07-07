@@ -1,6 +1,8 @@
 const { Model, DataTypes } = require("sequelize");
 const conn = require("../../lib/sequelize");
-const User = require("./User")
+const User = require("./User");
+const ClientCredential = require('./ClientCredential');
+const {addNewCredentials} = require('../../lib/utils');
 
 class Seller extends Model {}
 
@@ -31,6 +33,10 @@ Seller.init(
     currency: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
     }
   },
   {
@@ -41,5 +47,14 @@ Seller.init(
 
 Seller.hasMany(User);
 User.belongsTo(Seller);
+
+Seller.hasMany(ClientCredential);
+ClientCredential.belongsTo(Seller);
+
+Seller.addHook("beforeUpdate", seller => {
+    if (seller.dataValues.active && !seller._previousDataValues.active) {
+        addNewCredentials(seller.dataValues.id);
+    }
+})
 
 module.exports = Seller;

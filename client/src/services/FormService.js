@@ -33,7 +33,7 @@ class FormService {
         try {
             json = await res.json();
         } catch (e){}
-        if (res.status === 200) {
+        if (res.status >= 200 && res.status < 300) {
             return {...json, success: true};
         }
         if (json && json.errors) {
