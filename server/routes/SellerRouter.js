@@ -1,23 +1,25 @@
 const { Router } = require("express");
-const { Op } = require("sequelize");
 const Seller = require("../models/sequelize/Seller");
 const ClientCredential = require("../models/sequelize/ClientCredential");
 const router = Router();
 const { sendErrors } = require("../lib/utils");
-const JWTMiddleWare = require("../middleWares/JWTMiddleWare");
+const checkTokenMiddleWare = require("../middleWares/checkTokenMiddleWare");
 const checkRoleMiddleWare = require("../middleWares/checkRoleMiddleWare");
-const {generateClientIdAndClientSecret} = require("../lib/utils");
+const {generateRandomString} = require("../lib/utils");
 
-router.use(JWTMiddleWare);
+router.use(checkTokenMiddleWare('jwt'));
 
 router.post("/generateCredentials/:id", (req, res) => {
-    if (req.user.sellerId != null && req.user.sellerId !== parseInt(req.params.id)) {
+    if (
+        req.user.sellerId && req.user.sellerId !== parseInt(req.params.id)
+    ) {
         res.sendStatus(403);
         return;
     }
+
     const newCredentials = {
-        clientId: generateClientIdAndClientSecret(10),
-        clientSecret: generateClientIdAndClientSecret(15),
+        clientId: generateRandomString(10),
+        clientSecret: generateRandomString(15),
     }
 
     Seller.findOne({

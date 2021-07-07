@@ -11,13 +11,17 @@ exports.sendErrors = (req,res,e) => {
     });
 }
 
-exports.generateClientIdAndClientSecret = (n) => {
-    const chars = "azertyuiopqsdfghjklmwxcvbn0123456789$!?%&";
+exports.generateRandomString = (n, forbiddenChars = []) => {
+    const chars = "azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN0123456789$!?%&";
     let token = "";
-    for (let i=0;i<n;i++) {
-        token += chars[rand(0,chars.length-1)];
+    while (token.length < n) {
+        const char = chars[rand(0,chars.length-1)];
+        if (!forbiddenChars.includes(char))
+            token += char;
     }
     return token;
 }
+
+exports.generateAccessToken = () => exports.generateRandomString(50, ['$','!','?','%','&'])
 
 const rand = (a,b) => a+Math.floor(Math.random()*(b-a+1));
