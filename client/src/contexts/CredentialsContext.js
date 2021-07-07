@@ -21,7 +21,7 @@ export function CredentialsProvider({children}) {
                 res.errors ?
                     setErrors(res.errors) :
                     setCredentials(credentials.filter(credential => credential.id !== credentialToDelete.id))
-            )
+            ),
         [credentials]
     )
     const generateCredential = useCallback(
