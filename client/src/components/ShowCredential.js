@@ -15,7 +15,7 @@ function ShowCredential({credential}) {
             </label>
             <input type="text" disabled value={credential.clientSecret}/><br/>
             <input type="button" onClick={() => window.confirm("Êtes vous sur de vouloir le supprimer?") && removeCredential(credential)} value="Supprimer"/>
-            <input type="button" onClick={() => regenerateCredential(credential)} value="Regénérer"/>
+            <input type="button" onClick={() => window.confirm("Êtes vous sur de vouloir le Regénérer?") && regenerateCredential(credential)} value="Regénérer"/>
         </div>
     )
 }

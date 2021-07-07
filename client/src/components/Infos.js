@@ -1,7 +1,7 @@
 import React from 'react';
 import Form from "./lib/Form";
 import Credentials from "./Credentials";
-import SellerForm from "../forms/SellerForm";
+import SellerForm from "../forms/UserForm";
 import AuthService from "../services/AuthService";
 import {useState} from "react";
 import FormService from "../services/FormService";
@@ -13,40 +13,45 @@ function Infos() {
 	const [successOrErrors, setSuccessOrErrors] = useState(null);
 	const [successOrErrorsPassword, setSuccessOrErrorsPassword] = useState(null);
 
+	if (user == null) return null;
+
 	const changePassword = async ({password,password_confirm}) => {
 		if (password !== "" && password === password_confirm) {
 			const res = await AuthService.editPassword({password,password_confirm},user.access_token);
-			if (res.success) {
-				setSuccessOrErrorsPassword(true);
-			} else {
+			if (res.errors) {
 				setSuccessOrErrorsPassword(res.errors);
+			} else {
+				setSuccessOrErrorsPassword(true);
 			}
 		} else {
 			setSuccessOrErrorsPassword(["Les mots de passe de correspondent pas"]);
 		}
 	}
 
-	const changeSellerInfos = async ({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone}) => {
+	const changeInfos = async ({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone}) => {
 		const res = await AuthService.edit({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone},user.access_token)
-		if (res.success) {
+		if (res.errors) {
+			setSuccessOrErrors(res.errors);
+		} else {
 			localStorage.setItem("user", JSON.stringify({
 				...user,
 				numPhone,
+			...(user.Seller && {
 				Seller: {
-					...user.Seller,
-					siren,society,urlRedirectConfirm,urlRedirectCancel,currency
+				...
+					user.Seller,
+						siren, society, urlRedirectConfirm, urlRedirectCancel, currency
 				}
+			})
 			}))
 			setSuccessOrErrors(true);
-		} else {
-			setSuccessOrErrors(res.errors);
 		}
 	}
 
 	return (
 		<div>
 			<h1>Vos informations personnelles</h1>
-			<Form model={SellerForm(false)} dataValues={{...user.Seller, ...user}} submitLabel="Modifier" onSubmit={changeSellerInfos}>
+			<Form model={SellerForm(false, user.Seller != null)} dataValues={{...user.Seller, ...user}} submitLabel="Modifier" onSubmit={changeInfos}>
 			</Form>
 			{
 				successOrErrors === true &&
