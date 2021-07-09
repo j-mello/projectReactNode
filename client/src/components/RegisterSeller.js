@@ -3,8 +3,8 @@ import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import { useState } from "react";
 import { useHistory } from "react-router-dom";
-import Form from "./Form";
-import SellerForm from "../forms/SellerForm";
+import Form from "./lib/Form";
+import UserForm from "../forms/UserForm";
 
 function RegisterSeller() {
 
@@ -15,8 +15,8 @@ function RegisterSeller() {
     const register = async (values) => {
         const res = await AuthService.registerSeller(values);
         if (res) {
-            setErrorsOrSuccess(res.success ? true : res.errors);
-            if (res.success) {
+            setErrorsOrSuccess(res.errors ?? true);
+            if (res.errors === undefined) {
                 setTimeout(() => {
                     history.push("/");
                 }, 500);
@@ -28,8 +28,8 @@ function RegisterSeller() {
             <div className="row justify-content-center">
                 <div className="col-md-8">
                     <div className="card text-center">
-                        <div className="card-header"><h2>Inscription marchant</h2></div>
-                        <Form onSubmit={register} submitLabel="S'inscrire" model={SellerForm()}>
+                        <div className="card-header"><h2>Inscription marchand</h2></div>
+                        <Form onSubmit={register} submitLabel="S'inscrire" model={UserForm(true,true)}>
                         </Form>
                         {
                             Array.isArray(errorsOrSuccess) &&

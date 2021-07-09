@@ -10,8 +10,7 @@ export default function Index() {
 
     const getAllSellers = () => {
         SellerService.getSellers(user.access_token)
-            .then(res => res.json())
-            .then(sellers => setSellers(sellers));
+            .then(data => data.errors ? setErrors(data.errors) : setSellers(data));
     }
 
     useEffect(() => {
@@ -20,10 +19,10 @@ export default function Index() {
         }
     }, [])
 
-    const reGenerateCredentials = sellerToValid =>
-        SellerService.reGenerateCredentials(user.access_token,sellerToValid.id).then(res =>
+    const validSeller = sellerToValid =>
+        SellerService.validSeller(user.access_token,sellerToValid.id).then(res =>
             res.errors ? setErrors(res.errors) : setSellers(sellers.map(seller =>
-                seller.id === sellerToValid.id ? {...sellerToValid, ClientCredentialClientId: true} : seller
+                seller.id === sellerToValid.id ? {...sellerToValid, active: true} : seller
             ))
         )
 
@@ -36,7 +35,7 @@ export default function Index() {
             {
                 user != null && user.Seller == null && sellerToDisplay == null &&
                     <>
-                        <h1>Voici la liste des marchants :</h1>
+                        <h1>Voici la liste des marchands :</h1>
                         <table>
                             <thead>
                                 <tr>
@@ -62,8 +61,8 @@ export default function Index() {
                                             <td>{seller.urlRedirectCancel}</td>
                                             <td>{seller.currency}</td>
                                             {
-                                                !seller.ClientCredentialClientId &&
-                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && reGenerateCredentials(seller)}/></td>
+                                                !seller.active &&
+                                                <td><input type="button" value="Valider" onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/></td>
                                             }
                                         </tr>
                                     ) :

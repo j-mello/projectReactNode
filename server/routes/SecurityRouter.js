@@ -1,12 +1,11 @@
 const { Router } = require("express");
 const checkTokenMiddleWare = require("../middleWares/checkTokenMiddleWare");
-const {generateAccessToken} = require("../lib/utils");
 const User = require("../models/sequelize/User");
 const Oauth2Token = require("../models/sequelize/Oauth2Token");
 const Seller = require("../models/sequelize/Seller");
 const ClientCredential = require("../models/sequelize/ClientCredential");
 const jwt = require('jsonwebtoken');
-const { sendErrors } = require("../lib/utils");
+const { sendErrors, generateAccessToken } = require("../lib/utils");
 const bcrypt = require("bcryptjs");
 
 const router = Router();
@@ -37,10 +36,10 @@ router.post("/login", (req,res) => {
     let {password, email} = req.body;
     User.findOne({
         where: {email},
-        include: {model: Seller, include: ClientCredential}
+        include: Seller
     })
         .then(async user =>
-            user == null || !(await bcrypt.compare(password,user.password)) || (user.Seller != null && user.Seller.ClientCredential == null) ?
+            user == null || !(await bcrypt.compare(password,user.password)) || (user.Seller != null && !user.Seller.active) ?
                 res.sendStatus(401) :
                 res.json({
                     ...user.dataValues,

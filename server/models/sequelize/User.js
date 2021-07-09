@@ -24,7 +24,7 @@ User.init(
     numPhone: {
       type: DataTypes.STRING(13),
       allowNull: false
-    },
+    }
   },
   {
     sequelize: conn,

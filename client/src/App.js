@@ -23,30 +23,28 @@ function App() {
                 </ul>
               </div>
               <div className="d-flex">
-
-                {
-                  user == null ?
-                      (<ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                        <li className="nav-item">
-                          <Link className="nav-link active" aria-current="page" to="/login">Se connecter</Link>
-                        </li>
-                        <li className="nav-item">
-                          <Link className="nav-link active" aria-current="page" to="/register-seller">S'inscrire (marchant)</Link>
-                        </li>
-                      </ul>)
-                      :
-                      (<ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                          {
-                              user.Seller != null &&
-                              <li className="nav-item">
-                                  <Link className="nav-link active" aria-current="page" to="/infos">Informations</Link>
-                              </li>
-                          }
-                        <li className="nav-item">
-                          <a className="nav-link active" aria-current="page" href="#" onClick={() => AuthService.logout()}>Se déconnecter</a>
-                        </li>
-                      </ul>)
-                }
+                  <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
+                      {
+                          user == null ?
+                              (<>
+                                  <li className="nav-item">
+                                      <Link className="nav-link active" aria-current="page" to="/login">Se connecter</Link>
+                                  </li>
+                                  <li className="nav-item">
+                                      <Link className="nav-link active" aria-current="page" to="/register-seller">S'inscrire (marchant)</Link>
+                                  </li>
+                              </>)
+                              :
+                              (<>
+                                  <li className="nav-item">
+                                      <Link className="nav-link active" aria-current="page" to="/infos">Informations</Link>
+                                  </li>
+                                  <li className="nav-item">
+                                      <a className="nav-link active" aria-current="page" href="#" onClick={() => AuthService.logout()}>Se déconnecter</a>
+                                  </li>
+                              </>)
+                      }
+                  </ul>
               </div>
             </div>
           </nav>

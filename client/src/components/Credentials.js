@@ -1,21 +1,18 @@
-import React, {useState} from 'react';
-import SellerService from "../services/SellerService";
+import React, {useContext} from 'react';
 import FormService from "../services/FormService";
+import ShowCredential from "./ShowCredential";
+import {CredentialsContext} from "../contexts/CredentialsContext";
 
 function Credentials() {
 	const user = JSON.parse(localStorage.getItem("user"));
+	const {credentials,errors, removeCredential, generateCredential, regenerateCredential} = useContext(CredentialsContext);
 
-	const [values, setValues] = useState({
-		clientId: user && user.Seller && user.Seller.ClientCredential && user.Seller.ClientCredential.clientId,
-		clientSecret: user && user.Seller && user.Seller.ClientCredential && user.Seller.ClientCredential.clientSecret,
-	});
-	const [successOrErrors, setSuccessOrErrors] = useState(null);
 
-	if (user == null || user.Seller == null || user.Seller.ClientCredential == null) return;
+	if (user == null || user.Seller == null) return null;
 
-	const reGenerateCredentials = () => {
+	/*const reGenerateCredentials = () => {
 		SellerService.reGenerateCredentials(user.access_token,user.SellerId).then(res =>
-			res.success ?
+			res.errors ? setSuccessOrErrors(res.errors) :
 				setValues(res) | setSuccessOrErrors(true) |
 				localStorage.setItem("user", JSON.stringify({
 					...user,
@@ -23,30 +20,30 @@ function Credentials() {
 						...user.Seller,
 						ClientCredential: res
 					}
-				})) :
-				setSuccessOrErrors(res.errors)
+				}))
+
 		)
-	}
+	}*/
 
 	return (
 		<>
 			<h2>Les credentials</h2>
-			<label>
-				Le client id :
-				<input value={values.clientId} disabled="disabled"/>
-			</label><br/>
-			<label>
-				Le client secret :
-				<input value={values.clientSecret} disabled="disabled"/>
-			</label><br/>
-			<input type="button" value="Regénérer" onClick={reGenerateCredentials}/>
+			<ul>
+				{
+					credentials.length > 0 ?
+						credentials.map(credential =>
+							<li key={credential.id}>
+								<ShowCredential credential={credential}>
+								</ShowCredential>
+							</li>
+						)
+						:
+						<p>Aucun crédential trouvé</p>
+				}
+			</ul>
+			<input type="button" onClick={generateCredential} value="Créer"/>
 			{
-				successOrErrors === true &&
-				<p style={{color: 'green'}}>Crédentials régénérés</p>
-			}
-			{
-				successOrErrors instanceof Array &&
-					FormService.displayErrors(successOrErrors)
+				FormService.displayErrors(errors)
 			}
 		</>
 	)
