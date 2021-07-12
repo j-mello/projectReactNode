@@ -75,6 +75,7 @@ router.post("/login-oauth2", (req, res) => {
                     SellerId: clientCredential.Seller.id
                 }).save()
                     .then(_ => res.status(200).json({
+                        ...clientCredential.Seller.dataValues,
                         accessToken,
                         expires_in
                     }))
@@ -83,6 +84,14 @@ router.post("/login-oauth2", (req, res) => {
         })
         .catch(e => sendErrors(req,res,e))
 })
+
+router.post('/logout-oauth2', checkTokenMiddleWare('oauth2'), (req,res) => {
+    Oauth2Token.destroy({
+        where: {accessToken: req.token}
+    })
+        .then(_ => res.sendStatus(200))
+        .catch(e => sendErrors(req,res,e));
+});
 
 router.use(checkTokenMiddleWare('jwt'));
 
