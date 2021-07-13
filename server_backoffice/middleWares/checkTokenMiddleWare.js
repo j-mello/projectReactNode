@@ -48,11 +48,10 @@ const checkTokenMiddleWare = (type = "both") => async (req, res, next) => {
                 req.seller = oauth2Token.Seller;
                 next();
                 return;
-            } else if (oauth2Token.expires < new Date()) {
-                Oauth2Token.destroy({
-                    where: {accessToken: token}
-                });
             }
+            Oauth2Token.destroy({
+                where: {accessToken: token}
+            });
         }
     }
 
