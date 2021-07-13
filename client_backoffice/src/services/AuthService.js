@@ -57,7 +57,7 @@ class AuthService {
             alert("Vous êtes déjà déconnecté!");
             return;
         }
-        // Send a disconnect request to the server
+        // Send a disconnect request to the server_backoffice
         AuthService.deleteSession();
     }
 

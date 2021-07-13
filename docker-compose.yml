@@ -8,7 +8,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
-      - ./db-data-mongo:/data/bin:rw
+      - db-data-mongo:/data/bin:rw
 
   db:
     image: postgres:alpine
@@ -21,7 +21,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data:rw
 
-  server:
+  server_backoffice:
     image: node:alpine3.10
     ports:
       - 3001:3000
@@ -31,19 +31,29 @@ services:
       DATABASE_URL: "postgres://root:password@db:5432/app"
       JWT_SECRET: "THIS_IS_A_SECRET"
     volumes:
-      - ./server:/home/node/app
+      - ./server_backoffice:/home/node/app
     working_dir: /home/node/app
     command: sh -c "npm start --no-update-notifier"
 
-  client:
+  client_backoffice:
     image: node:alpine3.10
     ports:
       - 3000:3000
     environment: { }
     volumes:
-      - ./client:/home/node/app
+      - ./client_backoffice:/home/node/app
+    working_dir: /home/node/app
+    command: sh -c "yarn install --no-update-notifier; yarn start --no-update-notifier"
+
+  client_seller:
+    image: node:alpine3.10
+    ports:
+    - 3002:3000
+    volumes:
+      - ./client_seller:/home/node/app
     working_dir: /home/node/app
     command: sh -c "yarn install --no-update-notifier; yarn start --no-update-notifier"
 
 volumes:
   db-data: {}
+  db-data-mongo: {}

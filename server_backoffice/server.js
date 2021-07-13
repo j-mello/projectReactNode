@@ -24,4 +24,4 @@ app.use("/sellers", SellerRouter);
 app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
 
-app.listen(process.env.PORT || 3000, () => console.log("server listening"));
+app.listen(process.env.PORT || 3000, () => console.log("server_backoffice listening"));

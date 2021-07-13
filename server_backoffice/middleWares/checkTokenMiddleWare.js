@@ -19,6 +19,8 @@ const checkTokenMiddleWare = (type = "both") => async (req, res, next) => {
         return res.sendStatus(401);
     }
 
+    req.token = token;
+
     if (type === "jwt" || type === "both") {
         const user = await (() => {
             return new Promise((resolve => {
@@ -41,11 +43,12 @@ const checkTokenMiddleWare = (type = "both") => async (req, res, next) => {
             where: {accessToken: token},
             include: Seller
         })
-        if (oauth2Token != null && oauth2Token.expires >= new Date()) {
-            req.seller = oauth2Token.Seller;
-            next();
-            return;
-        } else if (oauth2Token.expires < new Date()) {
+        if (oauth2Token != null) {
+            if (oauth2Token.expires >= new Date()) {
+                req.seller = oauth2Token.Seller;
+                next();
+                return;
+            }
             Oauth2Token.destroy({
                 where: {accessToken: token}
             });
