@@ -30,6 +30,7 @@ services:
       MONGO_URL: "mongodb://root:password@mongo:27017/app"
       DATABASE_URL: "postgres://root:password@db:5432/app"
       JWT_SECRET: "THIS_IS_A_SECRET"
+      CONVERTER_RATE_API_KEY: "e92a8080144940310b62cd6113fb28e4"
     volumes:
       - ./server_backoffice:/home/node/app
     working_dir: /home/node/app
