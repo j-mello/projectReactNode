@@ -1,4 +1,5 @@
 import React, {createContext, useState, useEffect, useCallback} from 'react';
+import SellerService from '../services/SellerService';
 
 export const ProductContext = createContext();
 
@@ -26,6 +27,8 @@ const defaultList = [
     }
 ]
 
+const rand = (a, b) => a + Math.floor(Math.random()*(b - a + 1));
+
 export function ProductProvider({children}) {
 
     const [list, setList] = useState([]);
@@ -35,7 +38,18 @@ export function ProductProvider({children}) {
     const [priceByCurrency, setPriceByCurrency] = useState({});
 
     useEffect(() => {
-        setList(defaultList);
+        SellerService.getSellers()
+        .then ((sellers) => 
+            setList(defaultList.map(product => {
+                const seller = sellers[rand (0, sellers.length -1)]
+                return {
+                    ...product,
+                    SellerId: seller.id,
+                    SellerSociety: seller.society
+                }
+            }
+            ))
+        )
     }, []);
 
     const buyProduct = useCallback(

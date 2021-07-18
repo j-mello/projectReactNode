@@ -5,6 +5,15 @@ const checkTokenMiddleWare = require("../middleWares/checkTokenMiddleWare");
 const checkRoleMiddleWare = require("../middleWares/checkRoleMiddleWare");
 const {sendErrors} = require("../lib/utils");
 
+router.get("/", (req, res) => {
+   Seller.findAll({
+       order: [
+           ['id', 'ASC']
+       ]})
+       .then(sellers => res.json(sellers))
+       .catch(e => sendErrors(req, res, e))
+});
+
 router.use(checkTokenMiddleWare('jwt'));
 
 router.use(checkRoleMiddleWare('admin'));
@@ -22,15 +31,6 @@ router.post("/:id/active", (req,res) => {
             }
         })
         .catch(e => sendErrors(req,res,e));
-});
-
-router.get("/", (req, res) => {
-   Seller.findAll({
-       order: [
-           ['id', 'ASC']
-       ]})
-       .then(sellers => res.json(sellers))
-       .catch(e => sendErrors(req, res, e))
 });
 
 module.exports = router;
