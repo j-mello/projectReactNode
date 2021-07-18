@@ -23,6 +23,10 @@ Transaction.init(
             type: DataTypes.STRING,
             allowNull: false
         },
+        cb: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         amount: {
             type: DataTypes.INTEGER,
             allowNull: false
