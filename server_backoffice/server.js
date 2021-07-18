@@ -7,7 +7,6 @@ const TransactionRouter = require("./routes/TransactionRouter");
 const mustacheExpress = require("mustache-express");
 const migrate = require("./lib/sequalizeloader");
 const cors = require('cors');
-const { Transaction } = require("sequelize/types");
 
 migrate().then(()=>{
     console.log("Exportation terminée");

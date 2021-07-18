@@ -1,11 +1,13 @@
-import React, {useContext} from 'react';
+import React, {useContext, useEffect} from 'react';
 import {ProductContext} from '../contexts/ProductContext';
 
 function ProductList(){
 
     const {
-        list, buyProduct, cart, priceByCurrency
+        list, buyProduct, carts, priceByCurrency
     } = useContext(ProductContext);
+
+    useEffect(() => console.log(carts), [carts]);
 
     return (
         <div>
@@ -16,6 +18,7 @@ function ProductList(){
                         <span>{item.productName} </span>
                         <span>{item.price} </span>
                         <span>{item.currency} </span>
+                        <span>Societé : {item.SellerSociety} </span>
                         <input type='button' value="Acheter" onClick={()=> 
                             window.confirm("C'est votre dernier mot ?") &&
                             buyProduct(item)}>
@@ -25,7 +28,9 @@ function ProductList(){
                     </li>
                 )}
             </ul>
-            <div>Nombre élements du panier : {cart.length}</div>
+            <div>Nombre élements du panier : {Object.keys(carts).reduce((acc, SellerId) => {
+                return acc + carts[SellerId].length;               
+            }, 0)}</div>
             <div>Prix total : 
                 <ul>{
                 Object.keys(priceByCurrency).map((currency) => 

@@ -3,26 +3,25 @@ import SellerService from '../services/SellerService';
 
 export const ProductContext = createContext();
 
+const originCurrency = 'EUR';
+
 const defaultList = [
     {
         id: 1,
         productName: "Tablette graphique",
         price: 230,
-        currency: "USD",
         nbPurchase: 0
     },
     {
         id: 2,
         productName: "The Elder Scrolls VI",
         price: 60,
-        currency: "EUR",
         nbPurchase: 0
     },
     {
         id: 3,
         productName: "One Piece 100",
-        price: 1000,
-        currency: "JPY",
+        price: 10,
         nbPurchase: 0
     }
 ]
@@ -33,7 +32,7 @@ export function ProductProvider({children}) {
 
     const [list, setList] = useState([]);
 
-    const [cart, setCart] = useState([]);
+    const [carts, setCarts] = useState({});
 
     const [priceByCurrency, setPriceByCurrency] = useState({});
 
@@ -45,7 +44,8 @@ export function ProductProvider({children}) {
                 return {
                     ...product,
                     SellerId: seller.id,
-                    SellerSociety: seller.society
+                    SellerSociety: seller.society,
+                    currency : seller.currency
                 }
             }
             ))
@@ -55,7 +55,9 @@ export function ProductProvider({children}) {
     const buyProduct = useCallback(
         (product) => setList(list.map(item =>
             item.id == product.id ? {...product, nbPurchase: product.nbPurchase + 1} : item ))
-            | setCart([...cart, product])
+            | setCarts({...carts, [product.SellerId] : 
+                carts[product.SellerId] ? [...carts[product.SellerId], product] : [product]
+            })
             | setPriceByCurrency({...priceByCurrency, [product.currency] : 
                 priceByCurrency[product.currency] ? 
                 priceByCurrency[product.currency] + product.price : product.price}),
@@ -63,7 +65,7 @@ export function ProductProvider({children}) {
     );
 
     return(
-        <ProductContext.Provider value={{ list, buyProduct, cart, priceByCurrency }}>
+        <ProductContext.Provider value={{ list, buyProduct, carts, priceByCurrency }}>
             {children}
         </ProductContext.Provider>
     )    
