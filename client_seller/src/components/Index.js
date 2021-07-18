@@ -1,5 +1,6 @@
 import React from 'react';
 import List from './List';
+import {ListProvider} from '../contexts/ListContext';
 
 
 function Index() {
@@ -9,7 +10,11 @@ function Index() {
         <div>
             <h1>Site marchand</h1>
             { seller == null && 
-                <List></List> }
+                <ListProvider>
+                    <List>
+                        
+                    </List>
+                </ListProvider> }
         </div>
     )
 }
