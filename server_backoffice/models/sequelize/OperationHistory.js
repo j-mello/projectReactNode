@@ -6,12 +6,8 @@ class OperationHistory extends Model {}
 
 OperationHistory.init(
     {
-        date: {
-            type: DataTypes.DATE,
-            allowNull: false
-        },
-        status: {
-            type: DataTypes.STRING,
+        state: {
+            type: DataTypes.BOOLEAN,
             allowNull: false
         }
     },

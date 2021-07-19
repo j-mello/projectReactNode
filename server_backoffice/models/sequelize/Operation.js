@@ -17,7 +17,7 @@ Operation.init(
             allowNull: false
         },
         price: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.FLOAT,
             allowNull: false
         },
         quotation: {
@@ -28,7 +28,7 @@ Operation.init(
             type: DataTypes.STRING,
             allowNull: false
         },
-        state: {
+        finish: {
             type: DataTypes.BOOLEAN,
             allowNull: false
         }

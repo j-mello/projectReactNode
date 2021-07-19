@@ -4,7 +4,7 @@ const SecurityRouter = require("./routes/SecurityRouter");
 const SellerRouter = require("./routes/SellerRouter");
 const CredentialsRouter = require("./routes/CredentialsRouter");
 const mustacheExpress = require("mustache-express");
-const migrate = require("./lib/sequalizeloader");
+const { migrate } = require("./lib/sequalizeloader");
 const cors = require('cors');
 
 migrate().then(()=>{

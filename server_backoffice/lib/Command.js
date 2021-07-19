@@ -1,3 +1,5 @@
+const readline = require("readline")
+
 module.exports = class Command {
     static commandName;
     static description;
@@ -118,6 +120,19 @@ module.exports = class Command {
         }
 
         return argsObject;
+    }
+
+    static question(ask){
+        return new Promise(resolve => {
+            const rl = readline.createInterface({
+                input: process.stdin,
+                output: process.stdout
+            });
+            rl.question(ask, answer => {
+                resolve(answer);
+                rl.close();
+            });
+        });
     }
 
     static argsModel = {};
