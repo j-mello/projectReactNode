@@ -20,6 +20,12 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - db-data:/var/lib/postgresql/data:rw
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 
   server_backoffice:
     image: node:alpine3.10

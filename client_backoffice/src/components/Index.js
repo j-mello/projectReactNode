@@ -9,7 +9,7 @@ export default function Index() {
     const [sellerToDisplay, setSellerToDisplay] = useState(user && user.Seller ? user.Seller : null);
 
     const getAllSellers = () => {
-        SellerService.getSellers(user.access_token)
+        SellerService.getSellers()
             .then(data => data.errors ? setErrors(data.errors) : setSellers(data));
     }
 
