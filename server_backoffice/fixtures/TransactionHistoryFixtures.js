@@ -11,7 +11,8 @@ class TransactionHistoryFixtures {
         for(let i = 1; i <= 50; i++){
             await new TransactionHistory({
                 status: transactionHistoryStatus[rand(0, transactionHistoryStatus.length - 1)],
-                TransactionId: TransactionList[rand(0, TransactionList.length - 1)].id
+                TransactionId: TransactionList[rand(0, TransactionList.length - 1)].id,
+                createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
             }).save()
         }
     }

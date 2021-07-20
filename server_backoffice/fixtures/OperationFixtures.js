@@ -15,7 +15,8 @@ class OperationFixtures {
                 quotation: "Text",
                 status: operationStatus[rand(0, operationStatus.length - 1)],
                 finish: rand(0,1) === 0,
-                TransactionId: transactionList[rand(0, transactionList.length - 1)].id
+                TransactionId: transactionList[rand(0, transactionList.length - 1)].id,
+                createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
             }).save()
         }
     }

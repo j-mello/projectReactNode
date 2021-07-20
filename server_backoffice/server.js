@@ -3,6 +3,7 @@ const UserRouter = require("./routes/UserRouter");
 const SecurityRouter = require("./routes/SecurityRouter");
 const SellerRouter = require("./routes/SellerRouter");
 const CredentialsRouter = require("./routes/CredentialsRouter");
+const KPIRouter = require("./routes/KPIRouter");
 const mustacheExpress = require("mustache-express");
 const { migrate } = require("./lib/sequalizeloader");
 const cors = require('cors');
@@ -23,5 +24,6 @@ app.use("/users", UserRouter);
 app.use("/sellers", SellerRouter);
 app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
+app.use("/kpi", KPIRouter);
 
 app.listen(process.env.PORT || 3000, () => console.log("server_backoffice listening"));

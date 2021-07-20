@@ -5,9 +5,7 @@ const { rand } = require('../lib/utils')
 
 class TransactionFixtures {
     static async action() {
-        const sellerIdList = await Seller.findAll().then((sellers) =>
-            sellers.map((seller) => seller.id)
-        )
+        const sellerIdList = await Seller.findAll()
 
         const transactionStatus = ['creating', 'waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
 
@@ -35,7 +33,8 @@ class TransactionFixtures {
                 amount: rand(1000, 20000)/100,
                 currency: "EUR",
                 status: transactionStatus[rand(0, transactionStatus.length - 1)],
-                SellerId: sellerIdList[rand(0, sellerIdList.length - 1)]
+                SellerId: sellerIdList[rand(0, sellerIdList.length - 1)].id,
+                createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
             }).save()
         }
     }
