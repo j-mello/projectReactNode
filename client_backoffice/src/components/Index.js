@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SellerService from "../services/SellerService";
+import { ChartBar, ChartLine } from './Charts'
 
 export default function Index() {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -84,6 +85,8 @@ export default function Index() {
                 user != null && sellerToDisplay != null &&
                     <>
                         <h1>Vous êtes marchand de la société {sellerToDisplay.society}</h1>
+                        <ChartBar />
+                        <ChartLine />
                     </>
             }
         </div>

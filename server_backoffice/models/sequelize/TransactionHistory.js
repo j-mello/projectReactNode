@@ -6,10 +6,6 @@ class TransactionHistory extends Model {}
 
 TransactionHistory.init(
     {
-        date: {
-            type: DataTypes.DATE,
-            allowNull: false
-        },
         status: {
             type: DataTypes.STRING,
             allowNull: false
