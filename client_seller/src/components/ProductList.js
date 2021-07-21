@@ -4,7 +4,7 @@ import {ProductContext} from '../contexts/ProductContext';
 function ProductList(){
 
     const {
-        list, buyProduct, carts, priceByCurrency
+        list, buyProduct, carts, priceByCurrency, removeProduct
     } = useContext(ProductContext);
 
     useEffect(() => console.log(carts), [carts]);
@@ -31,9 +31,21 @@ function ProductList(){
             <div>Nombre élements du panier : {Object.keys(carts).reduce((acc, SellerId) => {
                 return acc + carts[SellerId].length;               
             }, 0)}</div>
+            <ul>
+                {Object.keys(carts).map((SellerId) => 
+                carts[SellerId].map((product)=> 
+                <li key={product.id}>{product.productName} de {product.SellerSociety} pour {product.price} {product.currency}
+                <input type='button' value='Retirer du panier' onClick={()=> 
+                            window.confirm("Etes vous sur ?") &&
+                            removeProduct(product)}></input>
+                </li> 
+                )
+                )}
+            </ul>
             <div>Prix total : 
                 <ul>{
-                Object.keys(priceByCurrency).map((currency) => 
+                Object.keys(priceByCurrency).map((currency) =>
+                priceByCurrency[currency] > 0 && 
                 <li key={currency}>{currency} : {priceByCurrency[currency]}</li>
                 )
             }</ul>

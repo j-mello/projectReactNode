@@ -64,8 +64,20 @@ export function ProductProvider({children}) {
         [list]
     );
 
+    const removeProduct = useCallback(
+        (product) => setList(list.map(item =>
+            item.id != product.id ? item : {...product, nbPurchase: product.nbPurchase - 1}))
+            | setCarts({...carts, [product.SellerId] :
+            carts[product.SellerId].filter(item => 
+                item.id != product.id)})
+            | setPriceByCurrency({...priceByCurrency, [product.currency] :
+            priceByCurrency[product.currency] - product.price
+            }),
+        [list]
+    );
+
     return(
-        <ProductContext.Provider value={{ list, buyProduct, carts, priceByCurrency }}>
+        <ProductContext.Provider value={{ list, carts, priceByCurrency, buyProduct, removeProduct }}>
             {children}
         </ProductContext.Provider>
     )    
