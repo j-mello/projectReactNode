@@ -7,7 +7,10 @@ function ProductList(){
         list, buyProduct, carts, priceByCurrency, removeProduct
     } = useContext(ProductContext);
 
-    useEffect(() => console.log(carts), [carts]);
+    useEffect(()=>{
+        console.log({list, carts, priceByCurrency});
+    }
+    ,[list, carts, priceByCurrency])
 
     return (
         <div>
@@ -15,7 +18,7 @@ function ProductList(){
             <ul>
                 {list.map((item) => 
                     <li key={item.id}>
-                        <span>{item.productName} </span>
+                        <span>{item.name} </span>
                         <span>{item.price} </span>
                         <span>{item.currency} </span>
                         <span>Societé : {item.SellerSociety} </span>
@@ -29,17 +32,21 @@ function ProductList(){
                 )}
             </ul>
             <div>Nombre élements du panier : {Object.keys(carts).reduce((acc, SellerId) => {
-                return acc + carts[SellerId].length;               
+                return acc + carts[SellerId].reduce((acc, product) =>
+                    acc + product.quantity
+                , 0);               
             }, 0)}</div>
             <ul>
                 {Object.keys(carts).map((SellerId) => 
-                carts[SellerId].map((product)=> 
-                <li key={product.id}>{product.productName} de {product.SellerSociety} pour {product.price} {product.currency}
-                <input type='button' value='Retirer du panier' onClick={()=> 
-                            window.confirm("Etes vous sur ?") &&
-                            removeProduct(product)}></input>
-                </li> 
-                )
+                    carts[SellerId].map((product)=>
+                        product.quantity > 0 && 
+                        <li key={product.id}>{product.name} de {product.SellerSociety} pour {product.price} {product.currency}
+                            <input type='button' value='Retirer du panier' onClick={()=> 
+                                    window.confirm("Etes vous sur ?") &&
+                                    removeProduct(product)}>
+                            </input>
+                        </li> 
+                    )
                 )}
             </ul>
             <div>Prix total :

@@ -25,7 +25,7 @@ app.use("/users", UserRouter);
 app.use("/sellers", SellerRouter);
 app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
-app.use("/transaction", TransactionRouter);
+app.use("/transactions", TransactionRouter);
 app.use("/conversionRate", ConversionRateRouter);
 
 app.listen(process.env.PORT || 3000, () => console.log("server_backoffice listening"));

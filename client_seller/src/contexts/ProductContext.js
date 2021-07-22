@@ -7,20 +7,23 @@ export const ProductContext = createContext();
 const defaultList = [
     {
         id: 1,
-        productName: "Tablette graphique",
+        name: "Tablette graphique",
         price: 230,
+        quantity: 0,
         nbPurchase: 0
     },
     {
         id: 2,
-        productName: "The Elder Scrolls VI",
+        name: "The Elder Scrolls VI",
         price: 60,
+        quantity: 0,
         nbPurchase: 0
     },
     {
         id: 3,
-        productName: "One Piece 100",
+        name: "One Piece 100",
         price: 10,
+        quantity: 0,
         nbPurchase: 0
     }
 ]
@@ -62,7 +65,19 @@ export function ProductProvider({children}) {
         (product) => setList(list.map(item =>
             item.id === product.id ? {...product, nbPurchase: product.nbPurchase + 1} : item ))
             | setCarts({...carts, [product.SellerId] : 
-                carts[product.SellerId] ? [...carts[product.SellerId], product] : [product]
+                carts[product.SellerId] ? 
+                    carts[product.SellerId].find((item) =>
+                    item.id == product.id ) ?
+                        carts[product.SellerId].map((item) =>
+                        console.log({item, product}) |
+                        item.id == product.id ?
+                        {
+                            ...product,
+                            quantity: product.quantity + 1
+                        } : 
+                        item)
+                : [...carts[product.SellerId], {...product, quantity: 1}] :
+                [{...product, quantity: 1}]
             })
             | setPriceByCurrency({...priceByCurrency, [product.currency] : 
                 priceByCurrency[product.currency] ? 
@@ -74,8 +89,12 @@ export function ProductProvider({children}) {
         (product) => setList(list.map(item =>
             item.id !== product.id ? item : {...product, nbPurchase: product.nbPurchase - 1}))
             | setCarts({...carts, [product.SellerId] :
-            carts[product.SellerId].filter(item => 
-                item.id !== product.id)})
+            carts[product.SellerId].map(item => 
+                item.id !== product.id ? item :
+                {
+                    ...item,
+                    quantity: item.quantity - 1
+                })})
             | setPriceByCurrency({...priceByCurrency, [product.currency] :
             round(priceByCurrency[product.currency] - product.price, 2)
             }),
