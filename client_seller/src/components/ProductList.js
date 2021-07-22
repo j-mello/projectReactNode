@@ -42,13 +42,21 @@ function ProductList(){
                 )
                 )}
             </ul>
-            <div>Prix total : 
-                <ul>{
-                Object.keys(priceByCurrency).map((currency) =>
-                priceByCurrency[currency] > 0 && 
-                <li key={currency}>{currency} : {priceByCurrency[currency]}</li>
-                )
-            }</ul>
+            <div>Prix total :
+                {
+                    Object.keys(priceByCurrency).length > 0 ?
+                        <ul>
+                            {
+                                Object.keys(priceByCurrency).map((currency) =>
+                                    priceByCurrency[currency] > 0 &&
+                                    <li key={currency}>{currency} : {priceByCurrency[currency]}</li>
+                                )
+
+                            }
+                        </ul>
+                        :
+                        <p>Panier vide</p>
+                }
              </div>
         </div>
     );

@@ -4,8 +4,6 @@ import SellerService from '../services/SellerService';
 
 export const ProductContext = createContext();
 
-const originCurrency = 'EUR';
-
 const defaultList = [
     {
         id: 1,
@@ -46,14 +44,14 @@ export function ProductProvider({children}) {
         ])
         .then (([sellers, conversionRates]) => 
             setList(defaultList.map(product => {
-                const seller = sellers[rand (0, sellers.length -1)]
+                const seller = sellers[rand (0, sellers.length -1)];
                 return {
                     ...product,
                     SellerId: seller.id,
                     SellerSociety: seller.society,
                     currency : seller.currency,
                     price: round(product.price*conversionRates.find(conversionRate =>
-                        conversionRate.targetCurrency == seller.currency).rate, 2)
+                        conversionRate.targetCurrency === seller.currency).rate, 2)
                 }
             }
             ))
@@ -62,26 +60,26 @@ export function ProductProvider({children}) {
 
     const buyProduct = useCallback(
         (product) => setList(list.map(item =>
-            item.id == product.id ? {...product, nbPurchase: product.nbPurchase + 1} : item ))
+            item.id === product.id ? {...product, nbPurchase: product.nbPurchase + 1} : item ))
             | setCarts({...carts, [product.SellerId] : 
                 carts[product.SellerId] ? [...carts[product.SellerId], product] : [product]
             })
             | setPriceByCurrency({...priceByCurrency, [product.currency] : 
                 priceByCurrency[product.currency] ? 
-                priceByCurrency[product.currency] + product.price : product.price}),
-        [list]
+                round(priceByCurrency[product.currency] + product.price, 2) : product.price}),
+        [list,carts,priceByCurrency]
     );
 
     const removeProduct = useCallback(
         (product) => setList(list.map(item =>
-            item.id != product.id ? item : {...product, nbPurchase: product.nbPurchase - 1}))
+            item.id !== product.id ? item : {...product, nbPurchase: product.nbPurchase - 1}))
             | setCarts({...carts, [product.SellerId] :
             carts[product.SellerId].filter(item => 
-                item.id != product.id)})
+                item.id !== product.id)})
             | setPriceByCurrency({...priceByCurrency, [product.currency] :
-            priceByCurrency[product.currency] - product.price
+            round(priceByCurrency[product.currency] - product.price, 2)
             }),
-        [list]
+        [list,carts,priceByCurrency]
     );
 
     return(

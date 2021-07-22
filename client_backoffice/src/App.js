@@ -31,7 +31,7 @@ function App() {
                                       <Link className="nav-link active" aria-current="page" to="/login">Se connecter</Link>
                                   </li>
                                   <li className="nav-item">
-                                      <Link className="nav-link active" aria-current="page" to="/register-seller">S'inscrire (marchant)</Link>
+                                      <Link className="nav-link active" aria-current="page" to="/register-seller">S'inscrire (marchand)</Link>
                                   </li>
                               </>)
                               :
