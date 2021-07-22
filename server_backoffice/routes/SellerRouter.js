@@ -3,10 +3,16 @@ const Seller = require("../models/sequelize/Seller");
 const router = Router();
 const checkTokenMiddleWare = require("../middleWares/checkTokenMiddleWare");
 const checkRoleMiddleWare = require("../middleWares/checkRoleMiddleWare");
+const loginRequiredMiddleWare = require("../middleWares/loginRequiredMiddleWare");
 const {sendErrors} = require("../lib/utils");
+
+router.use(checkTokenMiddleWare('jwt', false));
 
 router.get("/", (req, res) => {
    Seller.findAll({
+       ...((req.user === undefined || req.user.sellerId !== undefined) && {
+          where: {active: true}
+       }),
        order: [
            ['id', 'ASC']
        ]})
@@ -14,7 +20,7 @@ router.get("/", (req, res) => {
        .catch(e => sendErrors(req, res, e))
 });
 
-router.use(checkTokenMiddleWare('jwt'));
+router.use(loginRequiredMiddleWare);
 
 router.use(checkRoleMiddleWare('admin'));
 

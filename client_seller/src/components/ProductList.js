@@ -7,11 +7,6 @@ function ProductList(){
         list, buyProduct, carts, priceByCurrency, removeProduct
     } = useContext(ProductContext);
 
-    useEffect(()=>{
-        console.log({list, carts, priceByCurrency});
-    }
-    ,[list, carts, priceByCurrency])
-
     return (
         <div>
             <h1>Voici la liste des produits</h1>
@@ -26,8 +21,6 @@ function ProductList(){
                             window.confirm("C'est votre dernier mot ?") &&
                             buyProduct(item)}>
                         </input>
-                        {item.nbPurchase > 0 &&
-                        <span> Acheté : {item.nbPurchase} fois </span>}
                     </li>
                 )}
             </ul>
@@ -40,7 +33,12 @@ function ProductList(){
                 {Object.keys(carts).map((SellerId) => 
                     carts[SellerId].map((product)=>
                         product.quantity > 0 && 
-                        <li key={product.id}>{product.name} de {product.SellerSociety} pour {product.price} {product.currency}
+                        <li key={product.id}>
+                            {product.name} de {product.SellerSociety} pour {product.price} {product.currency}
+                            {
+                                product.quantity > 1 &&
+                                    <>   ({product.quantity})</>
+                            }
                             <input type='button' value='Retirer du panier' onClick={()=> 
                                     window.confirm("Etes vous sur ?") &&
                                     removeProduct(product)}>
@@ -51,7 +49,9 @@ function ProductList(){
             </ul>
             <div>Prix total :
                 {
-                    Object.keys(priceByCurrency).length > 0 ?
+                    Object.keys(priceByCurrency).reduce((acc,currency) =>
+                        acc + priceByCurrency[currency]
+                    , 0) > 0 ?
                         <ul>
                             {
                                 Object.keys(priceByCurrency).map((currency) =>
