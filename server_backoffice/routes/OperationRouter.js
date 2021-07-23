@@ -1,5 +1,7 @@
+/*
 const { Router } = require("express");
-const Transaction = require("../models/mongo/Transaction");
+const { Operation } = require("../models/mongo/Operation");
+const Transaction = require('../models/mongo/Transaction');
 const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
 const {sendErrors} = require("../lib/utils");
 
@@ -8,15 +10,13 @@ const router = Router();
 router.use(checkTokenMiddleWare('jwt'));
 
 router.get("/", (request, response) => {
-    Transaction.find(request.query)
-        .then((data) => request.user.sellerId ?
-            response.json(data.filter(elt => { return elt.Seller && elt.Seller.id === request.user.sellerId })) :
-            response.json(data))
+    Operation.find(request.query)
+        .then((data) => response.json(data))
         .catch((e) => response.sendStatus(500));
 });
 
 router.post("/", (req, res) => {
-    new Transaction(req.body)
+    new Operation(req.body)
         .save()
         .then((data) => res.status(201).json(data))
         .catch((e) => res.sendStatus(500));
@@ -24,7 +24,7 @@ router.post("/", (req, res) => {
 
 router.get("/:id", (request, response) => {
     const { id } = request.params;
-    Transaction.findById(id)
+    Operation.findById(id)
         .then((data) =>
             data === null ? response.sendStatus(404) : response.json(data)
         )
@@ -33,7 +33,7 @@ router.get("/:id", (request, response) => {
 
 router.put("/:id", (req, res) => {
     const { id } = req.params;
-    Transaction.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })
+    Operation.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })
         .then((data) =>
             data !== null ? res.status(200).json(data) : res.sendStatus(404)
         )
@@ -42,18 +42,21 @@ router.put("/:id", (req, res) => {
 
 router.delete("/:id", (request, response) => {
     const { id } = request.params;
-    Transaction.findByIdAndDelete(id)
+    Operation.findByIdAndDelete(id)
         .then((data) =>
             data === null ? response.sendStatus(404) : response.sendStatus(204)
         )
         .catch((e) => response.sendStatus(500));
 });
 
-router.post("/kpi", (req,res) => {
+router.post("/kpi", (req, res) => {
     Transaction.aggregate([
         {
+            $unwind: "$Transactions"
+        },
+        {
             $match: {
-                createdAt: {
+                "Operations.createdAt": {
                     $gte: new Date(new Date().getTime() - 604800000)
                 },
                 ...(req.user.sellerId && {"Seller.id": req.user.sellerId})
@@ -61,23 +64,39 @@ router.post("/kpi", (req,res) => {
         },
         {
             $project: {
-                date: {$dateToString: {format: "%Y-%m-%d", date: "$createdAt"}}
+                date: {$dateToString: {format: "%Y-%m-%d", date: "$Transactions.createdAt"}},
+                status: "$status",
             }
         },
         {
             $group: {
-                _id: "$date",
-                numberTransaction: {
+                _id: {
+                    date: "$date",
+                    status: "$status",
+                },
+                numberOperation: {
                     $sum: 1
                 }
-            }
+            },
         },
         {
-            $sort: { "_id": 1 }
+            $group:{
+                _id: "$_id.date",
+                operation: {
+                    $addToSet: {
+                        status: "$_id.status",
+                        number: "$numberOperation",
+                    }
+                }
+            },
+
+        },
+        {
+            $sort: { "_id.date": 1 }
         },
     ])
-        .then(transaction => res.json(transaction))
-        .catch(e => res.status(200).json({error: e})/*sendErrors(req, res, e)*/)
+        .then(operations => res.json(operations))
+        .catch(e => sendErrors(req, res, e))
 });
 
-module.exports = router;
+module.exports = router;*/

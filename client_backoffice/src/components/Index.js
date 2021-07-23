@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SellerService from "../services/SellerService";
-import { ChartBar, ChartLine } from './Charts'
+import { ChartBar, ChartLine } from './Charts/Index'
 
 export default function Index() {
     const user = JSON.parse(localStorage.getItem("user"));

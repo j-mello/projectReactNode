@@ -13,6 +13,7 @@ class TransactionFixtures {
             await new Transaction({
                 facturationAddress: "2 rue des bananes",
                 deliveryAddress: "2 rue des bananes",
+                cb: "4242424242424242",
                 cart: JSON.stringify([
                     {
                         name: "Bananes",

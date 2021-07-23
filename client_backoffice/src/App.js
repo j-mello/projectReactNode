@@ -6,6 +6,8 @@ import Index from "./components/Index";
 import Login from "./components/Login";
 import RegisterSeller from "./components/RegisterSeller";
 import Infos from "./components/Infos";
+import Transactions from "./components/Transactions";
+import ListProvider from "./contexts/ListContext";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -40,6 +42,9 @@ function App() {
                                       <Link className="nav-link active" aria-current="page" to="/infos">Informations</Link>
                                   </li>
                                   <li className="nav-item">
+                                      <Link className="nav-link active" aria-current="page" to="/transactions">Transactions</Link>
+                                  </li>
+                                  <li className="nav-item">
                                       <a className="nav-link active" aria-current="page" href="#" onClick={() => AuthService.logout()}>Se déconnecter</a>
                                   </li>
                               </>)
@@ -54,6 +59,9 @@ function App() {
             <Route exact path="/login" component={Login}/>
             <Route exact path="/register-seller" component={RegisterSeller}/>
             <Route exact path="/infos" component={Infos}/>
+            <ListProvider>
+                <Route exact path="/transactions" component={Transactions} />
+            </ListProvider>
         </main>
 
       </BrowserRouter>
