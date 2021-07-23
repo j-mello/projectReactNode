@@ -8,6 +8,7 @@ import RegisterSeller from "./components/RegisterSeller";
 import Infos from "./components/Infos";
 import Transactions from "./components/Transactions";
 import ListProvider from "./contexts/ListContext";
+import SellerProvider from "./contexts/SellerContext";
 
 function App() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -16,11 +17,11 @@ function App() {
         <header>
           <nav className="navbar navbar-expand-lg navbar-light bg-light">
             <div className="container-fluid">
-              <a className="navbar-brand">Navbar scroll</a>
+              <a className="navbar-brand">Backoffice</a>
               <div className="collapse navbar-collapse" id="navbarScroll">
                 <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
                   <li className="nav-item">
-                    <Link className="nav-link active" aria-current="page" to="/">Home</Link>
+                    <Link className="nav-link active" aria-current="page" to="/">Accueil</Link>
                   </li>
                 </ul>
               </div>
@@ -55,7 +56,9 @@ function App() {
           </nav>
         </header>
         <main>
-            <Route exact path="/" component={Index}/>
+            <SellerProvider>
+                <Route exact path="/" component={Index}/>
+            </SellerProvider>
             <Route exact path="/login" component={Login}/>
             <Route exact path="/register-seller" component={RegisterSeller}/>
             <Route exact path="/infos" component={Infos}/>

@@ -50,13 +50,16 @@ router.delete("/:id", (request, response) => {
 });
 
 router.post("/kpi", (req,res) => {
+    if(req.body.sellerId === undefined && req.user.sellerId != undefined)
+        return res.sendStatus(403)
+
     Transaction.aggregate([
         {
             $match: {
                 createdAt: {
                     $gte: new Date(new Date().getTime() - 604800000)
                 },
-                ...(req.user.sellerId && {"Seller.id": req.user.sellerId})
+                ...(req.body.sellerId && {"Seller.id": parseInt(req.body.sellerId)})
             }
         },
         {

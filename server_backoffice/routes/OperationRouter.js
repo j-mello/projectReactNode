@@ -1,6 +1,5 @@
-/*
 const { Router } = require("express");
-const { Operation } = require("../models/mongo/Operation");
+/*const { Operation } = require("../models/mongo/Operation");*/
 const Transaction = require('../models/mongo/Transaction');
 const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
 const {sendErrors} = require("../lib/utils");
@@ -9,7 +8,7 @@ const router = Router();
 
 router.use(checkTokenMiddleWare('jwt'));
 
-router.get("/", (request, response) => {
+/*router.get("/", (request, response) => {
     Operation.find(request.query)
         .then((data) => response.json(data))
         .catch((e) => response.sendStatus(500));
@@ -48,24 +47,27 @@ router.delete("/:id", (request, response) => {
         )
         .catch((e) => response.sendStatus(500));
 });
-
+*/
 router.post("/kpi", (req, res) => {
+    if(req.body.sellerId === undefined && req.user.sellerId != undefined)
+        return res.sendStatus(403)
+
     Transaction.aggregate([
         {
-            $unwind: "$Transactions"
+            $unwind: "$Operations"
         },
         {
             $match: {
                 "Operations.createdAt": {
                     $gte: new Date(new Date().getTime() - 604800000)
                 },
-                ...(req.user.sellerId && {"Seller.id": req.user.sellerId})
+                ...(req.body.sellerId && {"Seller.id": parseInt(req.body.sellerId)})
             }
         },
         {
             $project: {
-                date: {$dateToString: {format: "%Y-%m-%d", date: "$Transactions.createdAt"}},
-                status: "$status",
+                date: {$dateToString: {format: "%Y-%m-%d", date: "$Operations.createdAt"}},
+                status: "$Operations.status",
             }
         },
         {
@@ -74,7 +76,7 @@ router.post("/kpi", (req, res) => {
                     date: "$date",
                     status: "$status",
                 },
-                numberOperation: {
+                numberOperations: {
                     $sum: 1
                 }
             },
@@ -82,21 +84,21 @@ router.post("/kpi", (req, res) => {
         {
             $group:{
                 _id: "$_id.date",
-                operation: {
+                operations: {
                     $addToSet: {
                         status: "$_id.status",
-                        number: "$numberOperation",
+                        number: "$numberOperations",
                     }
                 }
             },
 
         },
         {
-            $sort: { "_id.date": 1 }
+            $sort: { "_id": 1 }
         },
     ])
         .then(operations => res.json(operations))
         .catch(e => sendErrors(req, res, e))
 });
 
-module.exports = router;*/
+module.exports = router;

@@ -8,7 +8,7 @@ class OperationFixtures {
         const transactionList = await Transaction.findAll()
         const operationStatus = ['refusing', 'partial_refunding', 'refunding', 'capturing']
 
-        for(let i = 1; i <= 150; i++){
+        for(let i = 1; i <= 2000; i++){
             await new Operation({
                 price: rand(1000,5000)/100,
                 quotation: "Text",

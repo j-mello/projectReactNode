@@ -9,7 +9,7 @@ class TransactionFixtures {
 
         const transactionStatus = ['creating', 'waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
 
-        for (let i = 1; i <= 50; i++) {
+        for (let i = 1; i <= 1000; i++) {
             await new Transaction({
                 facturationAddress: "2 rue des bananes",
                 deliveryAddress: "2 rue des bananes",
