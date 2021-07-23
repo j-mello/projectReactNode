@@ -28,6 +28,6 @@ app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
 app.use("/conversionRate", ConversionRateRouter);
 app.use("/transactions", TransactionRouter);
-/*app.use("/operations", OperationRouter);*/
+app.use("/operations", OperationRouter);
 
 app.listen(process.env.PORT || 3000, () => console.log("server_backoffice listening"));

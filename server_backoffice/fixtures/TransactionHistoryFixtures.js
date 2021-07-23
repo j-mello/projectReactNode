@@ -8,7 +8,7 @@ class TransactionHistoryFixtures {
         const TransactionList = await Transaction.findAll()
         const transactionHistoryStatus = ['creating', 'waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
 
-        for(let i = 1; i <= 50; i++){
+        for(let i = 1; i <= 1000; i++){
             await new TransactionHistory({
                 status: transactionHistoryStatus[rand(0, transactionHistoryStatus.length - 1)],
                 TransactionId: TransactionList[rand(0, TransactionList.length - 1)].id,
