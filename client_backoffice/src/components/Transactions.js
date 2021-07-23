@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ListContext } from "../contexts/ListContext"
 import TransactionService from "../services/TransactionService";
 import PropTypes from 'prop-types';
+import SellerService from "../services/SellerService";
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
@@ -17,6 +18,8 @@ import Paper from '@material-ui/core/Paper';
 import TablePagination from '@material-ui/core/TablePagination';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 
 
 const Transactions = () => {
@@ -24,6 +27,8 @@ const Transactions = () => {
     const { list, setList } = useContext(ListContext);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [ selectedSeller, setSelectedSeller ] = useState(null);
+    const [ sellers, setSellers ] = useState([]);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -34,10 +39,37 @@ const Transactions = () => {
         setPage(0);
     };
 
-    useEffect(() => TransactionService.getTransactions().then(data => setList(data)), []);
+    const handleFilterChange = (event) => {
+        event.target.value === 'null' ? setSelectedSeller(null) : setSelectedSeller(event.target.value);
+    };
+
+    useEffect(() => TransactionService.getTransactions().then(data => setList(data)) &&
+        SellerService.getSellers()
+            .then(data => {
+                setSellers(
+                    data.filter(elt => {
+                        const localSellerId = JSON.parse(localStorage.getItem('user')).SellerId;
+                        console.log(localSellerId);
+                        return localSellerId === null || localSellerId === elt.id;
+                    })
+                )
+            }), []);
 
     return (
         <div>
+            <Select
+                labelId="demo-simple-select-filled-label"
+                id="demo-simple-select-filled"
+                value={selectedSeller}
+                onChange={handleFilterChange}
+            >
+                <MenuItem value="null">
+                    <em>None</em>
+                </MenuItem>
+                {
+                    sellers.map(seller => (<MenuItem value={seller.id}>{ seller.society }</MenuItem>))
+                }
+            </Select>
             <TableContainer component={Paper}>
                 <Table aria-label="collapsible table">
                     <TableHead>
@@ -52,7 +84,11 @@ const Transactions = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {list.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (<Row key={row._id} row={row}/>))
+                        {
+                            list
+                                .filter(elt => selectedSeller === null || selectedSeller === elt.Seller.id)
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map(row => (<Row key={row._id} row={row}/>))
                         }
                     </TableBody>
                 </Table>
