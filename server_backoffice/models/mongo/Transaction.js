@@ -25,7 +25,6 @@ const OperationHistorySchema = new Schema({
 })
 
 const OperationSchema = new Schema({
-    cb: String,
     price: Number,
     quotation: String,
     status: String,
@@ -46,6 +45,7 @@ const TransactionSchema = new Schema({
     facturationAddress: String,
     deliveryAddress: String,
     cart: [ProductSchema],
+    cb: String,
     amount: Number,
     currency: String,
     status: String,

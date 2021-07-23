@@ -14,6 +14,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
+import TablePagination from '@material-ui/core/TablePagination';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 
@@ -21,6 +22,17 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 const Transactions = () => {
 
     const { list, setList } = useContext(ListContext);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
     useEffect(() => TransactionService.getTransactions().then(data => setList(data)), []);
 
@@ -40,12 +52,20 @@ const Transactions = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {list.map((row) => (
-                            <Row key={row._id} row={row} />
-                        ))}
+                        {list.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => (<Row key={row._id} row={row}/>))
+                        }
                     </TableBody>
                 </Table>
             </TableContainer>
+            <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={list.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+            />
         </div>
     );
 }
