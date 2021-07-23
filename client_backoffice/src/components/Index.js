@@ -1,6 +1,7 @@
 import React, {useContext, useState} from 'react';
 import {ChartBar, ChartLine} from './Charts/Index'
 import {SellerContext} from "../contexts/SellerContext";
+import {SessionContext} from "../contexts/SessionContext";
 
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -12,14 +13,14 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 
 export default function Index() {
-    const user = JSON.parse(localStorage.getItem("user"));
     const [errors, setErrors] = useState([]);
+    const {user} = useContext(SessionContext);
     const {sellers, validSeller, setSellerToDisplay, sellerToDisplay} = useContext(SellerContext);
 
     const classes = makeStyles({
         table: {
             minWidth: 90,
-        },
+        }
     });
 
     return (
@@ -31,7 +32,7 @@ export default function Index() {
             {
                 user != null &&
                 <>
-                    <h1 style={{textAlignVertical: "center", textAlign: "center",}}>Dashboard{ sellerToDisplay && " de " + sellerToDisplay.society }</h1>
+                    <h1 style={{textAlignVertical: "center", textAlign: "center"}}>Dashboard{ sellerToDisplay && " de " + sellerToDisplay.society }</h1>
                     <ChartBar/>
                     <ChartLine/>
                     {
@@ -40,6 +41,12 @@ export default function Index() {
                             <h1 style={{textAlignVertical: "center", textAlign: "center",}}>Voici la liste des marchands
                                 :</h1>
                             <TableContainer component={Paper}>
+                                {
+                                    sellerToDisplay != null &&
+                                    <div style={{ textAlign: "center"}}>
+                                        <input type="button" value="Afficher tout le monde" onClick={() => setSellerToDisplay(null) | window.scrollTo(0, 0)}/>
+                                    </div>
+                                }
                                 <Table className={classes.table}>
                                     <TableHead>
                                         <TableRow>
@@ -71,11 +78,14 @@ export default function Index() {
                                                             <input type="button" value="Valider"
                                                                    onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/>
                                                             :
-                                                            <input type="button" value="Afficher"
-                                                                   onClick={() => setSellerToDisplay(seller) | window.scrollTo(0, 0)}/>
+                                                            (!sellerToDisplay || sellerToDisplay.id !== seller.id) ?
+                                                                <input type="button" value="Afficher"
+                                                                       onClick={() => setSellerToDisplay(seller) | window.scrollTo(0, 0)}/> :
+                                                                <>Affiché</>
                                                     }
                                                 </TableCell>
                                             </TableRow>
+
                                         ) :
                                         <TableCell align="center">Aucun marchand trouvé</TableCell>
                                 }

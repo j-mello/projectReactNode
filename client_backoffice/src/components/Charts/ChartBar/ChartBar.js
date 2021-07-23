@@ -2,13 +2,15 @@ import {ResponsiveBar} from '@nivo/bar'
 import {useEffect, useState, useContext} from "react";
 import KPIService from "../../../services/KPIService";
 import {SellerContext} from "../../../contexts/SellerContext";
+import {SessionContext} from "../../../contexts/SessionContext";
 import '../chart.css'
 
 const ChartBar = () => {
     const [data, setData] = useState([]);
     const {sellerToDisplay} = useContext(SellerContext)
+    const {user} = useContext(SessionContext);
 
-    useEffect(() => KPIService.getOperationKPI(sellerToDisplay ? sellerToDisplay.id : null).then(
+    useEffect(() =>  user && (!user.SellerId || sellerToDisplay) && KPIService.getOperationKPI(sellerToDisplay ? sellerToDisplay.id : null).then(
         data =>
             data.map(
                 day => ({
@@ -21,7 +23,7 @@ const ChartBar = () => {
             )
         )
         .then(
-        data => {
+        data =>
             setData(
                 data.map(
                     elt => {
@@ -39,7 +41,6 @@ const ChartBar = () => {
                     }
                 )
             )
-        }
     ), [sellerToDisplay]);
 
     return (

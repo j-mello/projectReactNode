@@ -2,14 +2,16 @@ import {useState, useEffect, useContext} from 'react'
 import { ResponsiveLine } from '@nivo/line'
 import KPIService from "../../../services/KPIService";
 import {SellerContext} from "../../../contexts/SellerContext";
+import {SessionContext} from "../../../contexts/SessionContext";
 import '../chart.css'
 
 const ChartLine = () => {
     const [data, setData] = useState([]);
-    const {sellerToDisplay} = useContext(SellerContext)
+    const {sellerToDisplay} = useContext(SellerContext);
+    const {user} = useContext(SessionContext);
 
-    useEffect(() => KPIService.getTransactionsKPI(sellerToDisplay ? sellerToDisplay.id : null).then(
-        data => {
+    useEffect(() => user && (!user.SellerId || sellerToDisplay) && KPIService.getTransactionsKPI(sellerToDisplay ? sellerToDisplay.id : null).then(
+        data =>
             setData([{
                 "id": "transaction",
                 "color": "hsl(3, 30%, 50%)",
@@ -22,7 +24,7 @@ const ChartLine = () => {
                     }
                 )
             }])
-        }
+
     ), [sellerToDisplay]);
 
     return (
