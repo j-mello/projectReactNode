@@ -14,8 +14,16 @@ import Paper from '@material-ui/core/Paper';
 
 export default function Index() {
     const [errors, setErrors] = useState([]);
+
+    const [sellerToDisplay, setSellerToDisplay] = useState(user && user.Seller ? user.Seller : null);
+
+    const getAllSellers = () => {
+        SellerService.getSellers(user.access_token)
+            .then(data => data.errors ? setErrors(data.errors) : setSellers(data));
+    }
     const {user} = useContext(SessionContext);
     const {sellers, validSeller, setSellerToDisplay, sellerToDisplay} = useContext(SellerContext);
+
 
     const classes = makeStyles({
         table: {

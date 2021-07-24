@@ -26,6 +26,7 @@ app.use("/users", UserRouter);
 app.use("/sellers", SellerRouter);
 app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
+app.use("/transactions", TransactionRouter);
 app.use("/conversionRate", ConversionRateRouter);
 app.use("/transactions", TransactionRouter);
 app.use("/operations", OperationRouter);

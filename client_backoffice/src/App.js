@@ -13,6 +13,7 @@ import SessionProvider, {SessionContext} from "./contexts/SessionContext";
 function App() {
   return (
       <BrowserRouter>
+
           <SessionProvider>
             <header>
               <nav className="navbar navbar-expand-lg navbar-light bg-light">

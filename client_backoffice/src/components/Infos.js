@@ -3,15 +3,21 @@ import Form from "./lib/Form";
 import Credentials from "./Credentials";
 import SellerForm from "../forms/UserForm";
 import AuthService from "../services/AuthService";
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import FormService from "../services/FormService";
 import PasswordForm from "../forms/PasswordForm";
 import {CredentialsProvider} from "../contexts/CredentialsContext";
+import ConversionService from "../services/ConversionService";
 import {SessionContext} from "../contexts/SessionContext";
 
 function Infos() {
-	const {user,successOrErrors,successOrErrorsPassword,changePassword,changeInfos} = useContext(SessionContext);
-	const [dataValues, setDataValues] = useState({});
+    const {user,successOrErrors,successOrErrorsPassword,changePassword,changeInfos} = useContext(SessionContext);
+	  const [dataValues, setDataValues] = useState({});
+	useEffect(() => {
+		ConversionService.getConversionRate()
+			.then(conversionRates => setCurrencies(conversionRates.map(conversionRate => conversionRate.targetCurrency)))
+	}, []);
+
 
 	useEffect(() => {
 		if (user !== null) {
@@ -22,7 +28,8 @@ function Infos() {
 	return ( user != null &&
 		<div>
 			<h1>Vos informations personnelles</h1>
-			<Form model={SellerForm(false, user.Seller != null)} dataValues={dataValues} submitLabel="Modifier" onSubmit={changeInfos}>
+		
+      <Form model={SellerForm(false, user.Seller != null, currencies)} dataValues={dataValues} submitLabel="Modifier" onSubmit={changeInfos}>
 			</Form>
 			{
 				successOrErrors === true &&

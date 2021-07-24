@@ -50,6 +50,7 @@ export default function Form({model, submitLabel , onSubmit, dataValues}) {
                             {
                                 model[fieldName].type === "select" ?
                                     <select name={fieldName} onChange={handleChange} value={values[fieldName]}>
+                                        <option>Choisissez</option>
                                         {
                                             Object.keys(model[fieldName].options).map(optionValue =>
                                                 <option key={"option-"+optionValue} value={optionValue}>{model[fieldName].options[optionValue]}</option>

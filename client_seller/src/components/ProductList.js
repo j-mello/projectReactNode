@@ -4,10 +4,8 @@ import {ProductContext} from '../contexts/ProductContext';
 function ProductList(){
 
     const {
-        list, buyProduct, carts, priceByCurrency
+        list, buyProduct, carts, priceByCurrency, removeProduct, payTransactions
     } = useContext(ProductContext);
-
-    useEffect(() => console.log(carts), [carts]);
 
     return (
         <div>
@@ -15,28 +13,58 @@ function ProductList(){
             <ul>
                 {list.map((item) => 
                     <li key={item.id}>
-                        <span>{item.productName} </span>
+                        <span>{item.name} </span>
                         <span>{item.price} </span>
                         <span>{item.currency} </span>
                         <span>Societé : {item.SellerSociety} </span>
                         <input type='button' value="Acheter" onClick={()=> 
-                            window.confirm("C'est votre dernier mot ?") &&
                             buyProduct(item)}>
                         </input>
-                        {item.nbPurchase > 0 &&
-                        <span> Acheté : {item.nbPurchase} fois </span>}
                     </li>
                 )}
             </ul>
             <div>Nombre élements du panier : {Object.keys(carts).reduce((acc, SellerId) => {
-                return acc + carts[SellerId].length;               
+                return acc + carts[SellerId].reduce((acc, product) =>
+                    acc + product.quantity
+                , 0);               
             }, 0)}</div>
-            <div>Prix total : 
-                <ul>{
-                Object.keys(priceByCurrency).map((currency) => 
-                <li key={currency}>{currency} : {priceByCurrency[currency]}</li>
-                )
-            }</ul>
+            <ul>
+                {Object.keys(carts).map((SellerId) => 
+                    carts[SellerId].map((product)=>
+                        product.quantity > 0 && 
+                        <li key={product.id}>
+                            {product.name} de {product.SellerSociety} pour {product.price} {product.currency}
+                            {
+                                product.quantity > 1 &&
+                                    <>   ({product.quantity})</>
+                            }
+                            <input type='button' value='Retirer du panier' onClick={()=> 
+                                    removeProduct(product)}>
+                            </input>
+                        </li> 
+                    )
+                )}
+            </ul>
+            <div>Prix total :
+                {
+                    Object.keys(priceByCurrency).reduce((acc,currency) =>
+                        acc + priceByCurrency[currency]
+                    , 0) > 0 ?
+                        <>
+                        <ul>
+                            {
+                                Object.keys(priceByCurrency).map((currency) =>
+                                    priceByCurrency[currency] > 0 &&
+                                    <li key={currency}>{currency} : {priceByCurrency[currency]}</li>
+                                )
+
+                            }
+                        </ul>
+                        <input type='button' value='Payer' onClick={payTransactions}></input>
+                        </>
+                        :
+                        <p>Panier vide</p>
+                }
              </div>
         </div>
     );

@@ -1,9 +1,68 @@
 const { Router } = require("express");
+
+const Seller =  require('../models/sequelize/Seller');
+const TransactionSeq = require('../models/sequelize/Transaction');
+const TransactionMon = require('../models/mongo/Transaction');
+const { sendErrors } = require('../lib/utils');
 const Transaction = require("../models/mongo/Transaction");
 const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
-const {sendErrors} = require("../lib/utils");
 
 const router = Router();
+
+TransactionRouter.post('/', (req,res) => {
+    if(!req.body.sellerId || !req.body.cart)
+    {
+        res.sendStatus(400);
+        return;
+    }
+    let jsonCart = null;
+    try {
+        jsonCart = JSON.parse(req.body.cart);
+    } catch (error) {
+        res.sendStatus(400);
+        return;
+    }
+    const transaction = {
+        facturationAddress: '62, Fear Street Shadyside 456CA',
+        deliveryAddress: '62, Fear Street Shadyside 456CA',
+        cart: req.body.cart,
+        cb: '424242424242',
+        amount: jsonCart.reduce((acc, product) => 
+        acc + product.price, 0
+        ),
+        currency: jsonCart[0].currency,
+        status: 'creating',
+        createdAt: new Date(),
+        updatedAt: new Date()
+    };
+    Seller.findOne({
+        where: {
+            id: req.body.sellerId
+        }
+    }).then(seller => 
+        seller == null ? res.sendStatus(404) :
+        Promise.all([
+            new TransactionSeq (transaction).save(),
+            TransactionMon.create(
+                {
+                    ...transaction,
+                    cart: jsonCart
+                })
+        ]) 
+        .then(([transactionSeq, transactionMon]) =>
+            res.sendStatus(200) |
+            setTimeout(()=> {
+                transactionSeq.status = 'waiting';
+                transactionMon.status = 'waiting';
+                Promise.all([
+                    transactionSeq.save(),
+                    transactionMon.save()
+                ]).catch((e)=> console.error(e));
+            }
+            , 15000) 
+        ).catch((e)=> sendErrors(req, res, e))
+    ).catch((e)=> sendErrors(req, res, e))
+})
 
 router.use(checkTokenMiddleWare('jwt'));
 
@@ -13,13 +72,6 @@ router.get("/", (request, response) => {
             response.json(data.filter(elt => { return elt.Seller && elt.Seller.id === request.user.sellerId })) :
             response.json(data))
         .catch((e) => response.sendStatus(500));
-});
-
-router.post("/", (req, res) => {
-    new Transaction(req.body)
-        .save()
-        .then((data) => res.status(201).json(data))
-        .catch((e) => res.sendStatus(500));
 });
 
 router.get("/:id", (request, response) => {
