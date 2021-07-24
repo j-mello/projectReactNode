@@ -1,6 +1,7 @@
 import React, {createContext, useState, useEffect, useCallback} from 'react';
 import ConversionService from '../services/ConversionService';
 import SellerService from '../services/SellerService';
+import TransactionService from '../services/TransactionService';
 
 export const ProductContext = createContext();
 
@@ -77,6 +78,19 @@ export function ProductProvider({children,seller}) {
         [list,carts,priceByCurrency]
     );
 
+    const payTransactions = useCallback(
+        () =>
+            Promise.all(Object.keys(carts).map((sellerId) =>
+                TransactionService.createTransaction(carts[sellerId], sellerId)
+            )).then(_ => {
+                setCarts({});
+                setPriceByCurrency({});
+                setList(list.map((item) => 
+                    ({...item, quantity: 0})
+                ))
+            }).catch((e)=> console.error(e))
+    )
+
     const removeProduct = useCallback(
         (product) =>
             setCarts({...carts,
@@ -94,7 +108,7 @@ export function ProductProvider({children,seller}) {
     );
 
     return(
-        <ProductContext.Provider value={{ list, carts, priceByCurrency, buyProduct, removeProduct }}>
+        <ProductContext.Provider value={{ list, carts, priceByCurrency, buyProduct, removeProduct, payTransactions }}>
             {children}
         </ProductContext.Provider>
     )    

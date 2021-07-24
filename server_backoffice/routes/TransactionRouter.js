@@ -27,7 +27,7 @@ TransactionRouter.post('/', (req,res) => {
         amount: jsonCart.reduce((acc, product) => 
         acc + product.price, 0
         ),
-        currency: seller.currency,
+        currency: jsonCart[0].currency,
         status: 'creating',
         createdAt: new Date(),
         updatedAt: new Date()
@@ -53,7 +53,7 @@ TransactionRouter.post('/', (req,res) => {
                 transactionMon.status = 'waiting';
                 Promise.all([
                     transactionSeq.save(),
-                    transacationMon.save()
+                    transactionMon.save()
                 ]).catch((e)=> console.error(e));
             }
             , 15000) 

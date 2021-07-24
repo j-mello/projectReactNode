@@ -4,7 +4,7 @@ import {ProductContext} from '../contexts/ProductContext';
 function ProductList(){
 
     const {
-        list, buyProduct, carts, priceByCurrency, removeProduct
+        list, buyProduct, carts, priceByCurrency, removeProduct, payTransactions
     } = useContext(ProductContext);
 
     return (
@@ -18,7 +18,6 @@ function ProductList(){
                         <span>{item.currency} </span>
                         <span>Societé : {item.SellerSociety} </span>
                         <input type='button' value="Acheter" onClick={()=> 
-                            window.confirm("C'est votre dernier mot ?") &&
                             buyProduct(item)}>
                         </input>
                     </li>
@@ -40,7 +39,6 @@ function ProductList(){
                                     <>   ({product.quantity})</>
                             }
                             <input type='button' value='Retirer du panier' onClick={()=> 
-                                    window.confirm("Etes vous sur ?") &&
                                     removeProduct(product)}>
                             </input>
                         </li> 
@@ -52,6 +50,7 @@ function ProductList(){
                     Object.keys(priceByCurrency).reduce((acc,currency) =>
                         acc + priceByCurrency[currency]
                     , 0) > 0 ?
+                        <>
                         <ul>
                             {
                                 Object.keys(priceByCurrency).map((currency) =>
@@ -61,6 +60,8 @@ function ProductList(){
 
                             }
                         </ul>
+                        <input type='button' value='Payer' onClick={payTransactions}></input>
+                        </>
                         :
                         <p>Panier vide</p>
                 }
