@@ -26,7 +26,7 @@ const rand = (a, b) => a + Math.floor(Math.random()*(b - a + 1));
 
 const round = (n, p) => Math.round(n*10**p)/10**p;
 
-export function ProductProvider({children}) {
+export function ProductProvider({children,seller}) {
 
     const [list, setList] = useState([]);
 
@@ -35,25 +35,26 @@ export function ProductProvider({children}) {
     const [priceByCurrency, setPriceByCurrency] = useState({});
 
     useEffect(() => {
-        Promise.all([
-            SellerService.getSellers(),
-            ConversionService.getConversionRate()
-        ])
-        .then (([sellers, conversionRates]) => 
-            setList(defaultList.map(product => {
-                const seller = sellers[rand (0, sellers.length -1)];
-                return {
-                    ...product,
-                    SellerId: seller.id,
-                    SellerSociety: seller.society,
-                    currency : seller.currency,
-                    price: round(product.price*conversionRates.find(conversionRate =>
-                        conversionRate.targetCurrency === seller.currency).rate, 2)
-                }
-            }
-            ))
-        )
-    }, []);
+        if (seller == null) {
+            Promise.all([
+                SellerService.getSellers(),
+                ConversionService.getConversionRate()
+            ])
+                .then(([sellers, conversionRates]) =>
+                    setList(defaultList.map(product => {
+                        const seller = sellers[rand(0, sellers.length - 1)];
+                        return {
+                            ...product,
+                            SellerId: seller.id,
+                            SellerSociety: seller.society,
+                            currency: seller.currency,
+                            price: round(product.price * conversionRates.find(conversionRate =>
+                                conversionRate.targetCurrency === seller.currency).rate, 2)
+                        }
+                    }))
+                )
+        }
+    }, [seller]);
 
     const buyProduct = useCallback(
         (product) =>
