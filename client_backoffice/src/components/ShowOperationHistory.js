@@ -43,7 +43,39 @@ export default function ShowOperationHistory({ selectedItem = false }) {
     return (
         <>
             <Modal open={modal} onClose={() => setModal(false)}>
-                <h1>Bonjour</h1>
+                <Paper className={classes.root}>
+                    <TableContainer className={classes.container}>
+                        <Table stickyHeader aria-label="sticky table">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>Terminé</TableCell>
+                                    <TableCell>Date création</TableCell>
+                                    <TableCell>Date modification</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {selectedItem.Operations && selectedItem.Operations.OperationHistories && selectedItem.Operations.OperationHistories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                                    return (
+                                        <>
+                                            <TableRow>{row.state}</TableRow>
+                                            <TableRow>{row.createdAt}</TableRow>
+                                            <TableRow>{row.updatedAt}</TableRow>
+                                        </>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                    <TablePagination
+                        rowsPerPageOptions={[10, 25, 100]}
+                        component="div"
+                        count={selectedItem.Operations && selectedItem.Operations.OperationHistories && selectedItem.Operations.OperationHistories.length}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                </Paper>
             </Modal>
         </>
     );
