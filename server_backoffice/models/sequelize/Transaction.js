@@ -1,11 +1,12 @@
-const {Model, DataTypes} = require("sequelize");
+const { Model, DataTypes } = require("sequelize");
 const conn = require("../../lib/sequelize");
+const Seller = require('./Seller')
 
-class Transaction extends Model {}
+class Transaction extends Model { }
 
 Transaction.init(
     {
-        Id: {
+        id: {
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
@@ -45,5 +46,8 @@ Transaction.init(
         modelName: "Transaction",
     }
 );
+
+Transaction.belongsTo(Seller)
+Seller.hasMany(Transaction)
 
 module.exports = Transaction;

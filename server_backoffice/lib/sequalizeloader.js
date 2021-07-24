@@ -10,4 +10,10 @@ async function migrate() {
     return await sequelize.sync({alter:true});
 }
 
-module.exports = migrate;
+async function drop() {
+    const path = __dirname+"/../models/sequelize/";
+    const models = (await fs.readdir(path)).filter(file => file.endsWith(".js")).map(file => require(path+file));
+    await Promise.all(models.map(model => model.destroy({where:{}})))
+}
+
+module.exports = {migrate, drop};

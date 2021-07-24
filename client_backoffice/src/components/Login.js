@@ -1,20 +1,15 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import { useState } from "react";
 import Form from "./lib/Form";
 import LoginForm from "../forms/LoginForm";
+import {SessionContext} from "../contexts/SessionContext";
 
 function Login() {
 
-    const [ errors, setErrors ] = useState([])
+    const {login,loginErrors} = useContext(SessionContext);
 
-    const login = async (values) => {
-        const res = await AuthService.login(values);
-        if (res && res.errors) {
-            setErrors(res.errors);
-        }
-    }
     return (
         <div className="container mt-5">
             <div className="row justify-content-center">
@@ -24,7 +19,7 @@ function Login() {
                         <Form onSubmit={login} submitLabel="Connexion" model={LoginForm()}>
                         </Form>
                         {
-                            FormService.displayErrors(errors)
+                            FormService.displayErrors(loginErrors)
                         }
                     </div>
                 </div>
