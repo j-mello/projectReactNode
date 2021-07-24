@@ -6,10 +6,14 @@ export const SessionContext = createContext();
 
 
 export default function SessionProvider({children}) {
-    const [seller,setSeller] = useState(JSON.parse(localStorage.getItem("seller")));
+    const [seller,setSeller] = useState(null);
     const [loginFailed,setLoginFailed] = useState(false)
 
     const history = useHistory();
+
+    useEffect(() => {
+        setSeller(JSON.parse(localStorage.getItem("seller")))
+    }, [])
 
     const login = useCallback(
         (values) => SessionService.login(values)
