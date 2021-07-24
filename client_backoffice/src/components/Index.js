@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import {ChartBar, ChartLine} from './Charts/Index'
+import {ChartBar, ChartLine} from './Charts/Index';
 import {SellerContext} from "../contexts/SellerContext";
 import {SessionContext} from "../contexts/SessionContext";
 
@@ -15,12 +15,6 @@ import Paper from '@material-ui/core/Paper';
 export default function Index() {
     const [errors, setErrors] = useState([]);
 
-    const [sellerToDisplay, setSellerToDisplay] = useState(user && user.Seller ? user.Seller : null);
-
-    const getAllSellers = () => {
-        SellerService.getSellers(user.access_token)
-            .then(data => data.errors ? setErrors(data.errors) : setSellers(data));
-    }
     const {user} = useContext(SessionContext);
     const {sellers, validSeller, setSellerToDisplay, sellerToDisplay} = useContext(SellerContext);
 

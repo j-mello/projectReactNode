@@ -1,9 +1,8 @@
-import React, {useContext, useEffect} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Form from "./lib/Form";
 import Credentials from "./Credentials";
 import SellerForm from "../forms/UserForm";
 import AuthService from "../services/AuthService";
-import {useState,useEffect} from "react";
 import FormService from "../services/FormService";
 import PasswordForm from "../forms/PasswordForm";
 import {CredentialsProvider} from "../contexts/CredentialsContext";
@@ -12,7 +11,9 @@ import {SessionContext} from "../contexts/SessionContext";
 
 function Infos() {
     const {user,successOrErrors,successOrErrorsPassword,changePassword,changeInfos} = useContext(SessionContext);
-	  const [dataValues, setDataValues] = useState({});
+    const [dataValues, setDataValues] = useState({});
+    const [currencies, setCurrencies] = useState([]);
+
 	useEffect(() => {
 		ConversionService.getConversionRate()
 			.then(conversionRates => setCurrencies(conversionRates.map(conversionRate => conversionRate.targetCurrency)))

@@ -1,5 +1,4 @@
 const express = require("express");
-const UserRouter = require("./routes/UserRouter");
 const SecurityRouter = require("./routes/SecurityRouter");
 const SellerRouter = require("./routes/SellerRouter");
 const CredentialsRouter = require("./routes/CredentialsRouter");
@@ -22,7 +21,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 
-app.use("/users", UserRouter);
 app.use("/sellers", SellerRouter);
 app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
