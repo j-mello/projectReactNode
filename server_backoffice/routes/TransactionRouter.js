@@ -9,7 +9,7 @@ const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
 
 const router = Router();
 
-TransactionRouter.post('/', (req,res) => {
+router.post('/', (req,res) => {
     if(!req.body.sellerId || !req.body.cart)
     {
         res.sendStatus(400);
@@ -32,6 +32,7 @@ TransactionRouter.post('/', (req,res) => {
         ),
         currency: jsonCart[0].currency,
         status: 'creating',
+        SellerId: parseInt(req.body.sellerId),
         createdAt: new Date(),
         updatedAt: new Date()
     };

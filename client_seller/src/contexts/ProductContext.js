@@ -20,6 +20,16 @@ const defaultList = [
         id: 3,
         name: "One Piece 100",
         price: 10
+    },
+    {
+        id: 4,
+        name: "Batman Arkham World",
+        price: 70
+    },
+    {
+        id: 5,
+        name: "Poutine fondante",
+        price: 8
     }
 ]
 
