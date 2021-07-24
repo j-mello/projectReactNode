@@ -48,18 +48,21 @@ export default function ShowOperationHistory({ selectedItem = false }) {
                         <Table stickyHeader aria-label="sticky table">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>Terminé</TableCell>
+                                    <TableCell>Etat</TableCell>
                                     <TableCell>Date création</TableCell>
                                     <TableCell>Date modification</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {selectedItem.Operations && selectedItem.Operations.OperationHistories && selectedItem.Operations.OperationHistories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                                {
+                                    selectedItem && selectedItem.OperationHistories && selectedItem.OperationHistories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                                     return (
                                         <>
-                                            <TableRow>{row.state}</TableRow>
-                                            <TableRow>{row.createdAt}</TableRow>
-                                            <TableRow>{row.updatedAt}</TableRow>
+                                            <TableRow key={row._id}>
+                                                <TableCell>{row.state ? 'TERMINÉ' : 'EN COURS'}</TableCell>
+                                                <TableCell>{parseDate(row.createdAt)}</TableCell>
+                                                <TableCell>{parseDate(row.updatedAt)}</TableCell>
+                                            </TableRow>
                                         </>
                                     );
                                 })}
@@ -69,7 +72,7 @@ export default function ShowOperationHistory({ selectedItem = false }) {
                     <TablePagination
                         rowsPerPageOptions={[10, 25, 100]}
                         component="div"
-                        count={selectedItem.Operations && selectedItem.Operations.OperationHistories && selectedItem.Operations.OperationHistories.length}
+                        count={selectedItem && selectedItem.OperationHistories && selectedItem.OperationHistories.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

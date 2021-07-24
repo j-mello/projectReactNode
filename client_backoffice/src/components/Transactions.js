@@ -65,7 +65,7 @@ const Transactions = () => {
                             <em>None</em>
                         </MenuItem>
                         {
-                            sellers.map(seller => (<MenuItem value={seller.id}>{ seller.society }</MenuItem>))
+                            sellers.map(seller => (<MenuItem key={seller.id} value={seller.id}>{ seller.society }</MenuItem>))
                         }
                     </Select>
             }
@@ -180,7 +180,7 @@ function Row({ row, setSelectedTransaction }) {
                                         <TableCell>{operation.status}</TableCell>
                                         <TableCell>{parseDate(operation.createdAt)}</TableCell>
                                         <TableCell>
-                                            <Button variant="contained" color="primary" onClick={() => setSelectedTransaction(row)}>
+                                            <Button variant="contained" color="primary" onClick={() => setSelectedTransaction({...operation})}>
                                                 Voir historique
                                             </Button>
                                         </TableCell>
