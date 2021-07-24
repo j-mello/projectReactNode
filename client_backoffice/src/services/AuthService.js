@@ -3,23 +3,14 @@ import FormService from "./FormService";
 const apiUrl = "http://"+window.location.hostname+":3001/auth";
 
 class AuthService {
-    static async login(values) {
-
-        let res = await fetch(apiUrl+'/login', {
+    static login(values) {
+        return fetch(apiUrl+'/login', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
             },
             body: FormService.generateUrlEncodedBody(values)
         }).then(res => FormService.parseServerResponse(res));
-
-        if (res.errors) {
-            return res;
-        }
-
-        delete res.success;
-        localStorage.setItem("user", JSON.stringify(res));
-        window.location.href = "/";
     }
 
     static registerSeller(values) {
@@ -50,20 +41,6 @@ class AuthService {
             },
             body: FormService.generateUrlEncodedBody({...values, token})
         }).then(res => FormService.parseServerResponse(res));
-    }
-
-    static logout = async () => {
-        if (localStorage.getItem("user") == null) {
-            alert("Vous êtes déjà déconnecté!");
-            return;
-        }
-        // Send a disconnect request to the server_backoffice
-        AuthService.deleteSession();
-    }
-
-    static deleteSession = () => {
-        localStorage.removeItem("user");
-        window.location.href = "/";
     }
 }
 

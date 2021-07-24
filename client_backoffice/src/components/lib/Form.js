@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 // Example model :
 // optionnels : default, minLength, maxLength
@@ -17,13 +17,20 @@ import React, {useState} from 'react';
 
 export default function Form({model, submitLabel , onSubmit, dataValues}) {
     const [ values, setValues ] = useState(Object.keys(model).reduce((acc, fieldName) => {
-        if (dataValues && dataValues[fieldName]) {
-            acc[fieldName] = dataValues[fieldName];
-        } else {
-            acc[fieldName] = model[fieldName].default ?? ""
-        }
+        acc[fieldName] = model[fieldName].default ?? "";
         return acc;
     }, {}));
+
+    useEffect(() => {
+        setValues(Object.keys(model).reduce((acc, fieldName) => {
+            if (dataValues && dataValues[fieldName]) {
+                acc[fieldName] = dataValues[fieldName];
+            } else {
+                acc[fieldName] = model[fieldName].default ?? ""
+            }
+            return acc;
+        }, {}))
+    }, [dataValues])
 
     const handleChange = (event) => {
         setValues({...values, [event.target.name]: event.target.value})
@@ -43,6 +50,7 @@ export default function Form({model, submitLabel , onSubmit, dataValues}) {
                             {
                                 model[fieldName].type === "select" ?
                                     <select name={fieldName} onChange={handleChange} value={values[fieldName]}>
+                                        <option>Choisissez</option>
                                         {
                                             Object.keys(model[fieldName].options).map(optionValue =>
                                                 <option key={"option-"+optionValue} value={optionValue}>{model[fieldName].options[optionValue]}</option>

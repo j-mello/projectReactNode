@@ -1,57 +1,35 @@
-import React from 'react';
+import React, {useContext, useEffect} from 'react';
 import Form from "./lib/Form";
 import Credentials from "./Credentials";
 import SellerForm from "../forms/UserForm";
 import AuthService from "../services/AuthService";
-import {useState} from "react";
+import {useState,useEffect} from "react";
 import FormService from "../services/FormService";
 import PasswordForm from "../forms/PasswordForm";
 import {CredentialsProvider} from "../contexts/CredentialsContext";
+import ConversionService from "../services/ConversionService";
+import {SessionContext} from "../contexts/SessionContext";
 
 function Infos() {
-	const user = JSON.parse(localStorage.getItem("user"));
-	const [successOrErrors, setSuccessOrErrors] = useState(null);
-	const [successOrErrorsPassword, setSuccessOrErrorsPassword] = useState(null);
+    const {user,successOrErrors,successOrErrorsPassword,changePassword,changeInfos} = useContext(SessionContext);
+	  const [dataValues, setDataValues] = useState({});
+	useEffect(() => {
+		ConversionService.getConversionRate()
+			.then(conversionRates => setCurrencies(conversionRates.map(conversionRate => conversionRate.targetCurrency)))
+	}, []);
 
-	if (user == null) return null;
 
-	const changePassword = async ({password,password_confirm}) => {
-		if (password !== "" && password === password_confirm) {
-			const res = await AuthService.editPassword({password,password_confirm},user.access_token);
-			if (res.errors) {
-				setSuccessOrErrorsPassword(res.errors);
-			} else {
-				setSuccessOrErrorsPassword(true);
-			}
-		} else {
-			setSuccessOrErrorsPassword(["Les mots de passe de correspondent pas"]);
+	useEffect(() => {
+		if (user !== null) {
+			setDataValues({...user.Seller, ...user})
 		}
-	}
+	}, [user])
 
-	const changeInfos = async ({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone}) => {
-		const res = await AuthService.edit({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone},user.access_token)
-		if (res.errors) {
-			setSuccessOrErrors(res.errors);
-		} else {
-			localStorage.setItem("user", JSON.stringify({
-				...user,
-				numPhone,
-			...(user.Seller && {
-				Seller: {
-				...
-					user.Seller,
-						siren, society, urlRedirectConfirm, urlRedirectCancel, currency
-				}
-			})
-			}))
-			setSuccessOrErrors(true);
-		}
-	}
-
-	return (
+	return ( user != null &&
 		<div>
 			<h1>Vos informations personnelles</h1>
-			<Form model={SellerForm(false, user.Seller != null)} dataValues={{...user.Seller, ...user}} submitLabel="Modifier" onSubmit={changeInfos}>
+		
+      <Form model={SellerForm(false, user.Seller != null, currencies)} dataValues={dataValues} submitLabel="Modifier" onSubmit={changeInfos}>
 			</Form>
 			{
 				successOrErrors === true &&

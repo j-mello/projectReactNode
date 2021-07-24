@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Oauth2Token = require('../models/sequelize/Oauth2Token');
-const ClientCredential = require('../models/sequelize/ClientCredential');
+const loginRequiredMiddleWare = require('./loginRequiredMiddleWare');
 const Seller = require('../models/sequelize/Seller');
 
 const extractBearerToken = headerValue => {
@@ -12,11 +12,13 @@ const extractBearerToken = headerValue => {
     return matches && matches[2]
 }
 // type : jwt, oauth2 or both
-const checkTokenMiddleWare = (type = "both") => async (req, res, next) => {
+const checkTokenMiddleWare = (type = "both", loginRequired = true) => async (req, res, next) => {
     const token = req.query.token || req.body.token || (req.headers.authorization && extractBearerToken(req.headers.authorization));
 
-    if (!token) {
+    if (!token && loginRequired) {
         return res.sendStatus(401);
+    } else if (!token) {
+        return next();
     }
 
     req.token = token;
@@ -55,7 +57,11 @@ const checkTokenMiddleWare = (type = "both") => async (req, res, next) => {
         }
     }
 
-    res.sendStatus(401)
+    if (loginRequired) {
+        loginRequiredMiddleWare(req,res,next);
+    } else {
+        next();
+    }
 }
 
 module.exports = checkTokenMiddleWare;
