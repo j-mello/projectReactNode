@@ -1,0 +1,30 @@
+<html>
+    <body>
+        <h1>Page de paiement</h1>
+        Affichage panier
+        <ul>
+            {% for sellerId in carts|keys %}
+                {% for product in carts[sellerId] %}
+                    <li>
+                        <div>Produit : {{ product.name }} </div>
+                        <div>Quantité : {{ product.quantity }} </div>
+                        <div>Prix : {{ product.price }} {{ product.currency }}</div>
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+        Prix total
+        <ul>
+            {% for currency in totalPriceByCurrency|keys %}
+                <li> {{ currency }} : {{ totalPriceByCurrency[currency] }}</li>
+            {% endfor %}
+        </ul>
+        <form method="POST">
+            
+            <input name="cardNumber"/>
+            
+            <input type="submit" value="Payer"/>
+        </form>
+        
+    </body>
+</html>

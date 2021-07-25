@@ -5,7 +5,7 @@ const CredentialsRouter = require("./routes/CredentialsRouter");
 const ConversionRateRouter = require("./routes/ConversionRateRouter");
 const TransactionRouter = require("./routes/TransactionRouter");
 const OperationRouter = require("./routes/OperationRouter");
-const mustacheExpress = require("mustache-express");
+const { twig } = require("twig");
 const { migrate } = require("./lib/sequalizeloader");
 const cors = require('cors');
 
@@ -13,8 +13,8 @@ migrate().then(()=>{
     console.log("Exportation terminée");
 })
 const app = express();
-app.engine("mustache", mustacheExpress());
-app.set("view engine", "mustache");
+
+app.set('view engine', 'twig');
 app.set("views", __dirname + "/views");
 app.use(cors());
 
@@ -26,7 +26,27 @@ app.use("/credentials", CredentialsRouter);
 app.use("/auth", SecurityRouter);
 app.use("/transactions", TransactionRouter);
 app.use("/conversionRate", ConversionRateRouter);
-app.use("/transactions", TransactionRouter);
 app.use("/operations", OperationRouter);
+
+app.get("/payment", (req, res) => {
+    let jsonCarts =  {};
+    try {
+        jsonCarts =  JSON.parse(req.query.carts);
+    } catch (error) {
+        console.error(error);
+        return res.sendStatus(400);
+    }
+    res.render('payment.html.twig', {
+        carts: jsonCarts, 
+        redirectUrl : req.query.redirectUrl,
+        totalPriceByCurrency : Object.keys(jsonCarts).reduce((acc, SellerId)=>({
+            ...acc, ...jsonCarts[SellerId].reduce((acc, product) => ({
+                ...acc, [product.currency]: acc[product.currency] ? acc[product.currency] + product.price * product.quantity : product.price * product.quantity
+            }), acc)
+        })
+         ,{}   
+        )
+    });
+})
 
 app.listen(process.env.PORT || 3000, () => console.log("server_backoffice listening"));

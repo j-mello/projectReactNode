@@ -91,17 +91,8 @@ export function ProductProvider({children,seller}) {
 
     const payTransactions = useCallback(
         () =>
-            Promise.all(Object.keys(carts)
-                .filter(sellerId => carts[sellerId].reduce((acc,product) => acc+product.quantity, 0) > 0)
-                .map((sellerId) =>
-                    TransactionService.createTransaction(carts[sellerId], sellerId)
-            )).then(_ => {
-                setCarts({});
-                setPriceByCurrency({});
-                setList(list.map((item) => 
-                    ({...item, quantity: 0})
-                ))
-            }).catch((e)=> console.error(e))
+            window.location.href = "http://"+window.location.hostname+
+            ":3001/payment?carts="+JSON.stringify(carts)+"&redirectUrl="+window.location.href
     )
 
     const removeProduct = useCallback(
