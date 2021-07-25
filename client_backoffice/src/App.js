@@ -6,7 +6,7 @@ import Login from "./components/Login";
 import RegisterSeller from "./components/RegisterSeller";
 import Infos from "./components/Infos";
 import Transactions from "./components/Transactions";
-import ListProvider from "./contexts/ListContext";
+import TransactionProvider from "./contexts/TransactionContext";
 import SellerProvider from "./contexts/SellerContext";
 import SessionProvider, {SessionContext} from "./contexts/SessionContext";
 
@@ -67,13 +67,14 @@ function App() {
                         ({user}) =>
                             <SellerProvider user={user}>
                                 <Route exact path="/" component={Index}/>
+                                <TransactionProvider user={user}>
+                                    <Route exact path="/transactions" component={Transactions} />
+                                </TransactionProvider>
                             </SellerProvider>
                     }
                 </SessionContext.Consumer>
                 <Route exact path="/infos" component={Infos}/>
-                <ListProvider>
-                    <Route exact path="/transactions" component={Transactions} />
-                </ListProvider>
+
             </main>
           </SessionProvider>
 

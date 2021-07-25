@@ -7,7 +7,7 @@ class OperationHistoryFixtures {
     static async action () {
         const OperationList = await Operation.findAll()
 
-        for(let i = 1; i <= 200; i++){
+        for(let i = 1; i <= 2000; i++){
             await new OperationHistory({
                 state: rand(0,1) === 0,
                 OperationId: OperationList[rand(0, OperationList.length - 1)].id,

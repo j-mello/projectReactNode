@@ -42,7 +42,7 @@ module.exports = class LoadFixtures extends Command {
         const transactions = await Transaction.findAll({
             include: [{
                 model: Operation,
-                include: OperationHistory
+                include: [ OperationHistory ]
             },
                 TransactionHistory,
                 Seller
@@ -60,8 +60,8 @@ module.exports = class LoadFixtures extends Command {
                 Operations: transaction.dataValues.Operations.map((operation) =>
                     ({
                         ...operation.dataValues,
-                        OperationsHistories: operation.dataValues.OperationHistories.map((operationhistory) =>
-                            operationhistory.dataValues
+                        OperationHistories: operation.dataValues.OperationHistories.map((operationhistory) =>
+                             operationhistory.dataValues
                         )
                     }),
                 ),
@@ -69,8 +69,8 @@ module.exports = class LoadFixtures extends Command {
                     transactionhistory.dataValues
                 ),
                 Seller: transaction.dataValues.Seller.dataValues
-            })
-        ))
+            }))
+        )
     }
 
     static async load(fixture, fixturesLoaded) {

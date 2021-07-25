@@ -19,7 +19,7 @@ const SellerSchema = new Schema({
 
 const OperationHistorySchema = new Schema({
     date: Date,
-    state: String,
+    state: Boolean,
     createdAt: Date,
     updatedAt: Date
 })

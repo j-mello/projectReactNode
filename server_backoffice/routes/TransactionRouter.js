@@ -68,10 +68,13 @@ router.post('/', (req,res) => {
 router.use(checkTokenMiddleWare('jwt'));
 
 router.get("/", (request, response) => {
-    Transaction.find(request.query)
-        .then((data) => request.user.sellerId ?
-            response.json(data.filter(elt => { return elt.Seller && elt.Seller.id === request.user.sellerId })) :
-            response.json(data))
+    const { sellerId } = request.query;
+    if(request.user.sellerId && !sellerId) {
+        return response.sendStatus(403);
+    }
+
+    Transaction.find(sellerId ? { "Seller.id": sellerId} : {})
+        .then((data) => response.json(data))
         .catch((e) => response.sendStatus(500));
 });
 
