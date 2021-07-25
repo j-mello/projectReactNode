@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import {useContext, useEffect, useState} from 'react';
 import { TransactionContext } from "../contexts/TransactionContext";
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -21,7 +21,7 @@ import {SellerContext} from "../contexts/SellerContext";
 import {SessionContext} from "../contexts/SessionContext";
 import Button from "@material-ui/core/Button";
 import { parseDate } from "../lib/utils";
-import ShowOperationHistory from "./ShowOperationHistory";
+import ShowHistory from "./ShowHistory";
 
 const Transactions = () => {
 
@@ -30,7 +30,7 @@ const Transactions = () => {
     const { user } = useContext(SessionContext);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [selectedTransaction, setSelectedTransaction] = useState();
+    const [selectedHistory, setSelectedHistory] = useState(null);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -51,7 +51,7 @@ const Transactions = () => {
 
     return (
         <div>
-            <ShowOperationHistory selectedItem={selectedTransaction} />
+            <ShowHistory selectedHistory={selectedHistory} />
             <h1>Liste des transactions { sellerToDisplay && <> de {sellerToDisplay.society}</>}</h1>
             {
                 user && user.SellerId === null &&
@@ -80,6 +80,7 @@ const Transactions = () => {
                             <TableCell align="right"><strong>Currency</strong></TableCell>
                             <TableCell align="right"><strong>Statut</strong></TableCell>
                             <TableCell align="right"><strong>Dernière modification</strong></TableCell>
+                            <TableCell align="right"><strong>Actions</strong></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -87,7 +88,7 @@ const Transactions = () => {
                             listTransaction
                                 .filter(row => sellerToDisplay === null || row.Seller.id === sellerToDisplay.id)
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map(row => (<Row key={row._id} row={row} setSelectedTransaction={setSelectedTransaction} />))
+                                .map(row => (<Row key={row._id} row={row} setSelectedHistory={setSelectedHistory} />))
                         }
                     </TableBody>
                 </Table>
@@ -105,7 +106,7 @@ const Transactions = () => {
     );
 }
 
-function Row({ row, setSelectedTransaction }) {
+function Row({ row, setSelectedHistory }) {
 
     const useRowStyles = makeStyles({
         root: {
@@ -133,6 +134,11 @@ function Row({ row, setSelectedTransaction }) {
             <TableCell align="right">{row.currency}</TableCell>
             <TableCell align="right">{row.status}</TableCell>
             <TableCell align="right">{parseDate(row.updatedAt)}</TableCell>
+            <TableCell align="right">
+                <Button variant="contained" color="primary" onClick={() => setSelectedHistory([...row.TransactionHistories])}>
+                    Voir historique
+                </Button>
+            </TableCell>
         </TableRow>
         <TableRow>
             <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -180,7 +186,7 @@ function Row({ row, setSelectedTransaction }) {
                                         <TableCell>{operation.status}</TableCell>
                                         <TableCell>{parseDate(operation.createdAt)}</TableCell>
                                         <TableCell>
-                                            <Button variant="contained" color="primary" onClick={() => setSelectedTransaction({...operation})}>
+                                            <Button variant="contained" color="primary" onClick={() => setSelectedHistory([...operation.OperationHistories])}>
                                                 Voir historique
                                             </Button>
                                         </TableCell>

@@ -9,7 +9,7 @@ class OperationHistoryFixtures {
 
         for(let i = 1; i <= 2000; i++){
             await new OperationHistory({
-                state: rand(0,1) === 0,
+                finish: rand(0,1) === 0,
                 OperationId: OperationList[rand(0, OperationList.length - 1)].id,
                 createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
             }).save()

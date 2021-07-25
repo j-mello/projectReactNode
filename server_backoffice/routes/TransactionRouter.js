@@ -2,6 +2,7 @@ const { Router } = require("express");
 
 const Seller =  require('../models/sequelize/Seller');
 const TransactionSeq = require('../models/sequelize/Transaction');
+const TransactionHistory = require('../models/sequelize/TransactionHistory');
 const TransactionMon = require('../models/mongo/Transaction');
 const { sendErrors } = require('../lib/utils');
 const Transaction = require("../models/mongo/Transaction");
@@ -9,12 +10,21 @@ const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
 
 const router = Router();
 
-router.post('/', (req,res) => {
+router.post('/', async (req,res) => {
     if(!req.body.sellerId || !req.body.cart)
     {
         res.sendStatus(400);
         return;
     }
+
+    const seller = await Seller.findOne({
+        where: {
+            id: req.body.sellerId
+        }
+    })
+    if (seller == null)
+        return res.sendStatus(404);
+
     let jsonCart = null;
     try {
         jsonCart = JSON.parse(req.body.cart);
@@ -22,47 +32,55 @@ router.post('/', (req,res) => {
         res.sendStatus(400);
         return;
     }
+
+    if (jsonCart.find(product => product.currency !== seller.currency)) {
+        return res.sendStatus(400);
+    }
+
     const transaction = {
         facturationAddress: '62, Fear Street Shadyside 456CA',
         deliveryAddress: '62, Fear Street Shadyside 456CA',
         cart: req.body.cart,
         cb: '424242424242',
         amount: jsonCart.reduce((acc, product) => 
-        acc + product.price, 0
+            acc + product.price*product.quantity, 0
         ),
-        currency: jsonCart[0].currency,
+        currency: seller.currency,
         status: 'creating',
         SellerId: parseInt(req.body.sellerId),
         createdAt: new Date(),
         updatedAt: new Date()
     };
-    Seller.findOne({
-        where: {
-            id: req.body.sellerId
-        }
-    }).then(seller => 
-        seller == null ? res.sendStatus(404) :
+
+
+    const transactionSeq = await new TransactionSeq(transaction).save();
+    const transactionHistory = await new TransactionHistory({
+        status: 'creating',
+        TransactionId: transactionSeq.id
+    }).save();
+
+    const transactionMon = await TransactionMon.create({
+        id: transactionSeq.id,
+        ...transaction,
+        cart: jsonCart,
+        TransactionHistories: [transactionHistory.dataValues]
+    });
+
+    res.sendStatus(200);
+    setTimeout(()=> {
+        transactionSeq.status = 'waiting';
+        transactionMon.status = 'waiting';
+        transactionMon.TransactionHistories.push({status: 'waiting', createdAt: new Date(), updatedAt: new Date()});
+
         Promise.all([
-            new TransactionSeq (transaction).save(),
-            TransactionMon.create(
-                {
-                    ...transaction,
-                    cart: jsonCart
-                })
-        ]) 
-        .then(([transactionSeq, transactionMon]) =>
-            res.sendStatus(200) |
-            setTimeout(()=> {
-                transactionSeq.status = 'waiting';
-                transactionMon.status = 'waiting';
-                Promise.all([
-                    transactionSeq.save(),
-                    transactionMon.save()
-                ]).catch((e)=> console.error(e));
-            }
-            , 15000) 
-        ).catch((e)=> sendErrors(req, res, e))
-    ).catch((e)=> sendErrors(req, res, e))
+            transactionSeq.save(),
+            transactionMon.save(),
+            new TransactionHistory({
+                status: 'waiting',
+                TransactionId: transactionSeq.id
+            }).save()
+        ]);
+    }, 15000)
 })
 
 router.use(checkTokenMiddleWare('jwt'));
