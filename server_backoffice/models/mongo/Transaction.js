@@ -18,8 +18,7 @@ const SellerSchema = new Schema({
 })
 
 const OperationHistorySchema = new Schema({
-    date: Date,
-    state: Boolean,
+    finish: Boolean,
     createdAt: Date,
     updatedAt: Date
 })
@@ -28,7 +27,7 @@ const OperationSchema = new Schema({
     price: Number,
     quotation: String,
     status: String,
-    state: String,
+    finish: Boolean,
     OperationHistories: [OperationHistorySchema],
     createdAt: Date,
     updatedAt: Date
@@ -42,6 +41,7 @@ const TransactionHistorySchema = new Schema({
 })
 
 const TransactionSchema = new Schema({
+    id: Number,
     facturationAddress: String,
     deliveryAddress: String,
     cart: [ProductSchema],

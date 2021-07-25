@@ -12,9 +12,11 @@
     right: 0;
     bottom: 0;
     background: rgba(49,49,49,0.8);
+    z-index: 999
 }
 
 .modal {
+    z-index: 1000;
     height: auto;
     display: block;
     position: fixed;

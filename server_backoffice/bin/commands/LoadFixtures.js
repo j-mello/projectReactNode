@@ -7,6 +7,7 @@ const TransactionHistory = require("../../models/sequelize/TransactionHistory")
 const Operation = require("../../models/sequelize/Operation")
 const OperationHistory = require("../../models/sequelize/OperationHistory")
 const TransactionMongo = require("../../models/mongo/Transaction")
+const {generateMongoTransaction} = require("../../lib/utils");
 
 module.exports = class LoadFixtures extends Command {
     static commandName = "fixtures:load"
@@ -53,24 +54,7 @@ module.exports = class LoadFixtures extends Command {
             ]
         })
 
-        await TransactionMongo.insertMany(transactions.map((transaction) =>
-            ({
-                ...transaction.dataValues,
-                cart: JSON.parse(transaction.dataValues.cart),
-                Operations: transaction.dataValues.Operations.map((operation) =>
-                    ({
-                        ...operation.dataValues,
-                        OperationHistories: operation.dataValues.OperationHistories.map((operationhistory) =>
-                             operationhistory.dataValues
-                        )
-                    }),
-                ),
-                TransactionHistories: transaction.dataValues.TransactionHistories.map((transactionhistory) =>
-                    transactionhistory.dataValues
-                ),
-                Seller: transaction.dataValues.Seller.dataValues
-            }))
-        )
+        await TransactionMongo.insertMany(transactions.map((transaction) => generateMongoTransaction(transaction)));
     }
 
     static async load(fixture, fixturesLoaded) {

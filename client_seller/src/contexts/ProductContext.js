@@ -54,13 +54,14 @@ export function ProductProvider({children,seller}) {
                 .then(([sellers, conversionRates]) =>
                     setList(defaultList.map(product => {
                         const seller = sellers[rand(0, sellers.length - 1)];
+                        const conversionRate = conversionRates.find(conversionRate =>
+                            conversionRate.targetCurrency === seller.currency);
                         return {
                             ...product,
                             SellerId: seller.id,
                             SellerSociety: seller.society,
                             currency: seller.currency,
-                            price: round(product.price * conversionRates.find(conversionRate =>
-                                conversionRate.targetCurrency === seller.currency).rate, 2)
+                            price: conversionRate ? round(product.price * conversionRate.rate, 2) : product.price
                         }
                     }))
                 )
@@ -90,8 +91,10 @@ export function ProductProvider({children,seller}) {
 
     const payTransactions = useCallback(
         () =>
-            Promise.all(Object.keys(carts).map((sellerId) =>
-                TransactionService.createTransaction(carts[sellerId], sellerId)
+            Promise.all(Object.keys(carts)
+                .filter(sellerId => carts[sellerId].reduce((acc,product) => acc+product.quantity, 0) > 0)
+                .map((sellerId) =>
+                    TransactionService.createTransaction(carts[sellerId], sellerId)
             )).then(_ => {
                 setCarts({});
                 setPriceByCurrency({});

@@ -11,9 +11,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Modal from "./lib/Modal";
 import { parseDate } from "../lib/utils";
 
-export default function ShowOperationHistory({ selectedItem = false }) {
+export default function ShowHistory({ selectedHistory = false }) {
 
-    const [modal, setModal] = useState(selectedItem);
+    const [modal, setModal] = useState(selectedHistory);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -37,8 +37,8 @@ export default function ShowOperationHistory({ selectedItem = false }) {
     };
 
     useEffect(() => {
-        setModal(selectedItem);
-    }, [selectedItem]);
+        setModal(selectedHistory);
+    }, [selectedHistory]);
 
     return (
         <>
@@ -55,15 +55,20 @@ export default function ShowOperationHistory({ selectedItem = false }) {
                             </TableHead>
                             <TableBody>
                                 {
-                                    selectedItem && selectedItem.OperationHistories && selectedItem.OperationHistories.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+                                    (selectedHistory instanceof Array) && selectedHistory.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
                                     return (
-                                        <>
-                                            <TableRow key={row._id}>
-                                                <TableCell>{row.state ? 'TERMINÉ' : 'EN COURS'}</TableCell>
-                                                <TableCell>{parseDate(row.createdAt)}</TableCell>
-                                                <TableCell>{parseDate(row.updatedAt)}</TableCell>
-                                            </TableRow>
-                                        </>
+                                        <TableRow key={row._id}>
+                                            {
+                                                row.finish !== undefined &&
+                                                <TableCell>{row.finish ? 'TERMINÉ' : 'EN COURS'}</TableCell>
+                                            }
+                                            {
+                                                row.status !== undefined &&
+                                                <TableCell>{row.status}</TableCell>
+                                            }
+                                            <TableCell>{parseDate(row.createdAt)}</TableCell>
+                                            <TableCell>{parseDate(row.updatedAt)}</TableCell>
+                                        </TableRow>
                                     );
                                 })}
                             </TableBody>
@@ -72,7 +77,7 @@ export default function ShowOperationHistory({ selectedItem = false }) {
                     <TablePagination
                         rowsPerPageOptions={[10, 25, 100]}
                         component="div"
-                        count={selectedItem && selectedItem.OperationHistories && selectedItem.OperationHistories.length}
+                        count={(selectedHistory instanceof Array) ? selectedHistory.length : 0}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

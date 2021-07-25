@@ -1,58 +1,20 @@
 const { Router } = require("express");
-/*const { Operation } = require("../models/mongo/Operation");*/
-const Transaction = require('../models/mongo/Transaction');
+const Operation = require("../models/sequelize/Operation");
+const OperationHistory = require("../models/sequelize/OperationHistory");
+const TransactionHistory = require("../models/sequelize/TransactionHistory");
+const Seller = require("../models/sequelize/Seller");
+const TransactionMongo = require('../models/mongo/Transaction');
+const TransactionSeq = require('../models/sequelize/Transaction');
 const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
-const {sendErrors} = require("../lib/utils");
+const {sendErrors, isNumber, generateMongoTransaction} = require("../lib/utils");
 
 const router = Router();
 
-router.use(checkTokenMiddleWare('jwt'));
-
-/*router.get("/", (request, response) => {
-    Operation.find(request.query)
-        .then((data) => response.json(data))
-        .catch((e) => response.sendStatus(500));
-});
-
-router.post("/", (req, res) => {
-    new Operation(req.body)
-        .save()
-        .then((data) => res.status(201).json(data))
-        .catch((e) => res.sendStatus(500));
-});
-
-router.get("/:id", (request, response) => {
-    const { id } = request.params;
-    Operation.findById(id)
-        .then((data) =>
-            data === null ? response.sendStatus(404) : response.json(data)
-        )
-        .catch((e) => response.sendStatus(500));
-});
-
-router.put("/:id", (req, res) => {
-    const { id } = req.params;
-    Operation.findByIdAndUpdate(id, req.body, { new: true, runValidators: true })
-        .then((data) =>
-            data !== null ? res.status(200).json(data) : res.sendStatus(404)
-        )
-        .catch((e) => res.sendStatus(500));
-});
-
-router.delete("/:id", (request, response) => {
-    const { id } = request.params;
-    Operation.findByIdAndDelete(id)
-        .then((data) =>
-            data === null ? response.sendStatus(404) : response.sendStatus(204)
-        )
-        .catch((e) => response.sendStatus(500));
-});
-*/
-router.post("/kpi", (req, res) => {
+router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
     if(req.body.sellerId === undefined && req.user.sellerId != undefined)
         return res.sendStatus(403)
 
-    Transaction.aggregate([
+    TransactionMongo.aggregate([
         {
             $unwind: "$Operations"
         },
@@ -100,5 +62,130 @@ router.post("/kpi", (req, res) => {
         .then(operations => res.json(operations))
         .catch(e => sendErrors(req, res, e))
 });
+
+const createOperation = async (req, res, transactionId, status, amount = null) => {
+    const checkStatus = {
+        refund: ['refunding','refunded'],
+        refuse: ['refusing', 'refused'],
+        capture: ['capturing', 'captured']
+    }
+
+    if (checkStatus[status] &&
+        (amount != null && !(amount = isNumber(amount))) || !(transactionId = isNumber(transactionId))
+    ) {
+        return res.sendStatus(400);
+    }
+
+    let operationStatus = checkStatus[status][0];
+    let transactionStatus = checkStatus[status][1];
+
+    const transaction = await TransactionSeq.findOne({
+        where: {id: transactionId},
+        include: [
+            Seller,
+            {model: Operation, include: [OperationHistory]},
+            TransactionHistory
+        ]
+    });
+
+    const sellerId = (req.user && req.user.sellerId) ?
+        req.user.sellerId :
+        req.seller ?
+            req.seller.id :
+            null;
+
+    if (transaction == null)
+        return res.sendStatus(404);
+
+    if (transaction.status !== "waiting" || (sellerId && transaction.SellerId !== sellerId))
+        return res.sendStatus(403)
+
+    if (amount == null) {
+        amount = transaction.amount
+    } else if (amount > transaction.amount) {
+        return res.sendStatus(400);
+    }
+
+    let quotation;
+    if (status === "refund") {
+        quotation = "Remboursement de "+amount+" "+transaction.currency;
+        if (amount < transaction.amount) {
+            operationStatus = "partial_"+operationStatus;
+            transactionStatus = "partial_"+transactionStatus;
+        }
+    } else if (status === "refuse") {
+        quotation = "Paiement refusé";
+    } else if (status === "capture") {
+        quotation = "Paiement accepté"
+    }
+
+    const operation = await new Operation({
+        price: amount,
+        quotation,
+        status: operationStatus,
+        finish: false,
+        TransactionId: transactionId
+    }).save();
+
+    const operationHistory = await new OperationHistory({
+        finish: false,
+        OperationId: operation.id
+    }).save();
+
+    await TransactionMongo.deleteOne({id: transactionId});
+
+    await TransactionMongo.create(generateMongoTransaction(
+        transaction,
+        [{
+            ...operation.dataValues,
+            OperationHistories: [operationHistory.dataValues]
+        }]
+    ))
+
+    res.sendStatus(201);
+
+    setTimeout(async () => {
+        operation.finish = true;
+        transaction.status = transactionStatus;
+
+        const [,,transactionHistory,newOperationHistory] = await Promise.all([
+            operation.save(),
+            transaction.save(),
+            new TransactionHistory({
+                status: transactionStatus,
+                TransactionId: transaction.id
+            }).save(),
+            new OperationHistory({
+                finish: true,
+                OperationId: operation.id
+            }).save()
+        ]);
+
+        await TransactionMongo.deleteOne({id: transactionId});
+
+        await TransactionMongo.create(generateMongoTransaction(
+            transaction,
+            [{
+                ...operation.dataValues,
+                OperationHistories: [operationHistory.dataValues,newOperationHistory.dataValues]
+            }],
+            [transactionHistory.dataValues]
+        ))
+    }, 15000)
+}
+
+router.use(checkTokenMiddleWare('both'));
+
+router.post("/refund/:transactionId",  (req, res) =>
+    createOperation(req,res,req.params.transactionId,"refund",req.body.amount)
+);
+
+router.post("/capture/:transactionId", (req,res) =>
+    createOperation(req,res,req.params.transactionId,"capture")
+);
+
+router.post("/refuse/:transactionId", (req,res) =>
+    createOperation(req,res,req.params.transactionId,"refuse")
+);
 
 module.exports = router;
