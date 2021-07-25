@@ -10,99 +10,7 @@ const {sendErrors, isNumber, generateMongoTransaction} = require("../lib/utils")
 
 const router = Router();
 
-router.post("/refund/:transactionId", checkTokenMiddleWare('both'),  async (req, res) => {
-
-    let { transactionId } = req.params,
-        {amount} = req.body;
-
-    if (!(amount = isNumber(amount)) || !(transactionId = isNumber(transactionId))) {
-        return res.sendStatus(400);
-    }
-
-    const transaction = await TransactionSeq.findOne({
-        where: {id: transactionId},
-        include: [
-            Seller,
-            {model: Operation, include: [OperationHistory]},
-            TransactionHistory
-        ]
-    });
-
-    const sellerId = (req.user && req.user.sellerId) ?
-        req.user.sellerId :
-        req.seller ?
-            req.seller.id :
-            null;
-
-    if (transaction == null)
-        return res.sendStatus(404);
-
-    if (transaction.status !== "waiting" || (sellerId && transaction.SellerId !== sellerId))
-        return res.sendStatus(403)
-
-    if (amount > transaction.amount) {
-        return res.sendStatus(400);
-    }
-
-    const operation = await new Operation({
-        price: amount,
-        quotation: "Remboursement de "+amount+" "+transaction.currency,
-        status: amount === transaction.amount ? 'refunding' : 'partial_refunding',
-        finish: false,
-        TransactionId: transactionId
-    }).save();
-
-    const operationHistory = await new OperationHistory({
-        finish: false,
-        OperationId: operation.id
-    }).save();
-
-    await TransactionMongo.deleteOne({id: transactionId});
-
-    await TransactionMongo.create(generateMongoTransaction(
-        transaction,
-        [{
-            ...operation.dataValues,
-            OperationHistories: [operationHistory.dataValues]
-        }]
-    ))
-
-    res.sendStatus(201);
-
-    setTimeout(async () => {
-        operation.finish = true;
-        transaction.status = amount === transaction.amount ? 'refunded' : 'partial_refunded';
-
-        const [,,transactionHistory,newOperationHistory] = await Promise.all([
-            operation.save(),
-            transaction.save(),
-            new TransactionHistory({
-                status: amount === transaction.amount ? 'refunded' : 'partial_refunded',
-                TransactionId: transaction.id
-            }).save(),
-            new OperationHistory({
-                finish: true,
-                OperationId: operation.id
-            }).save()
-        ]);
-
-        await TransactionMongo.deleteOne({id: transactionId});
-
-        await TransactionMongo.create(generateMongoTransaction(
-            transaction,
-            [{
-                ...operation.dataValues,
-                OperationHistories: [operationHistory.dataValues,newOperationHistory.dataValues]
-            }],
-            [transactionHistory.dataValues]
-        ))
-    }, 15000)
-
-});
-
-router.use(checkTokenMiddleWare('jwt'));
-
-router.post("/kpi", (req, res) => {
+router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
     if(req.body.sellerId === undefined && req.user.sellerId != undefined)
         return res.sendStatus(403)
 
@@ -154,5 +62,130 @@ router.post("/kpi", (req, res) => {
         .then(operations => res.json(operations))
         .catch(e => sendErrors(req, res, e))
 });
+
+const createOperation = async (req, res, transactionId, status, amount = null) => {
+    const checkStatus = {
+        refund: ['refunding','refunded'],
+        refuse: ['refusing', 'refused'],
+        capture: ['capturing', 'captured']
+    }
+
+    if (checkStatus[status] &&
+        (amount != null && !(amount = isNumber(amount))) || !(transactionId = isNumber(transactionId))
+    ) {
+        return res.sendStatus(400);
+    }
+
+    let operationStatus = checkStatus[status][0];
+    let transactionStatus = checkStatus[status][1];
+
+    const transaction = await TransactionSeq.findOne({
+        where: {id: transactionId},
+        include: [
+            Seller,
+            {model: Operation, include: [OperationHistory]},
+            TransactionHistory
+        ]
+    });
+
+    const sellerId = (req.user && req.user.sellerId) ?
+        req.user.sellerId :
+        req.seller ?
+            req.seller.id :
+            null;
+
+    if (transaction == null)
+        return res.sendStatus(404);
+
+    if (transaction.status !== "waiting" || (sellerId && transaction.SellerId !== sellerId))
+        return res.sendStatus(403)
+
+    if (amount == null) {
+        amount = transaction.amount
+    } else if (amount > transaction.amount) {
+        return res.sendStatus(400);
+    }
+
+    let quotation;
+    if (status === "refund") {
+        quotation = "Remboursement de "+amount+" "+transaction.currency;
+        if (amount < transaction.amount) {
+            operationStatus = "partial_"+operationStatus;
+            transactionStatus = "partial_"+transactionStatus;
+        }
+    } else if (status === "refuse") {
+        quotation = "Paiement refusé";
+    } else if (status === "capture") {
+        quotation = "Paiement accepté"
+    }
+
+    const operation = await new Operation({
+        price: amount,
+        quotation,
+        status: operationStatus,
+        finish: false,
+        TransactionId: transactionId
+    }).save();
+
+    const operationHistory = await new OperationHistory({
+        finish: false,
+        OperationId: operation.id
+    }).save();
+
+    await TransactionMongo.deleteOne({id: transactionId});
+
+    await TransactionMongo.create(generateMongoTransaction(
+        transaction,
+        [{
+            ...operation.dataValues,
+            OperationHistories: [operationHistory.dataValues]
+        }]
+    ))
+
+    res.sendStatus(201);
+
+    setTimeout(async () => {
+        operation.finish = true;
+        transaction.status = transactionStatus;
+
+        const [,,transactionHistory,newOperationHistory] = await Promise.all([
+            operation.save(),
+            transaction.save(),
+            new TransactionHistory({
+                status: transactionStatus,
+                TransactionId: transaction.id
+            }).save(),
+            new OperationHistory({
+                finish: true,
+                OperationId: operation.id
+            }).save()
+        ]);
+
+        await TransactionMongo.deleteOne({id: transactionId});
+
+        await TransactionMongo.create(generateMongoTransaction(
+            transaction,
+            [{
+                ...operation.dataValues,
+                OperationHistories: [operationHistory.dataValues,newOperationHistory.dataValues]
+            }],
+            [transactionHistory.dataValues]
+        ))
+    }, 15000)
+}
+
+router.use(checkTokenMiddleWare('both'));
+
+router.post("/refund/:transactionId",  (req, res) =>
+    createOperation(req,res,req.params.transactionId,"refund",req.body.amount)
+);
+
+router.post("/capture/:transactionId", (req,res) =>
+    createOperation(req,res,req.params.transactionId,"capture")
+);
+
+router.post("/refuse/:transactionId", (req,res) =>
+    createOperation(req,res,req.params.transactionId,"refuse")
+);
 
 module.exports = router;

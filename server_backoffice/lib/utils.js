@@ -56,4 +56,6 @@ const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
 const isNumber = (n) => (typeof(n) == "number" || ( typeof(n) == "string" && parseFloat(n).toString() === n && n !== "NaN")) && parseFloat(n);
 
-module.exports = { sendErrors, generateMongoTransaction, generateRandomString, generateAccessToken, addNewCredentials, rand, isNumber };
+const round = (n,p) => Math.floor(n*10**p)/10**p;
+
+module.exports = { sendErrors, generateMongoTransaction, generateRandomString, generateAccessToken, addNewCredentials, rand, isNumber, round };

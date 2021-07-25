@@ -174,6 +174,7 @@ function Row({ row, setSelectedHistory }) {
                             <TableHead>
                                 <TableRow>
                                     <TableCell><strong>Prix</strong></TableCell>
+                                    <TableCell><strong>Etat</strong></TableCell>
                                     <TableCell><strong>Statut</strong></TableCell>
                                     <TableCell><strong>Date création</strong></TableCell>
                                     <TableCell><strong>Actions</strong></TableCell>
@@ -183,6 +184,7 @@ function Row({ row, setSelectedHistory }) {
                                 {row.Operations.map((operation) => (
                                     <TableRow key={operation._id}>
                                         <TableCell>{operation.price}</TableCell>
+                                        <TableCell>{operation.finish ? 'TERMINÉ' : 'EN COURS'}</TableCell>
                                         <TableCell>{operation.status}</TableCell>
                                         <TableCell>{parseDate(operation.createdAt)}</TableCell>
                                         <TableCell>
@@ -192,6 +194,12 @@ function Row({ row, setSelectedHistory }) {
                                         </TableCell>
                                     </TableRow>
                                 ))}
+                                {
+                                    row.Operations.length === 0 &&
+                                        <TableRow>
+                                            <TableCell>Aucune opération</TableCell>
+                                        </TableRow>
+                                }
                             </TableBody>
                         </Table>
                     </Box>

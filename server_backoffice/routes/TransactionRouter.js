@@ -4,7 +4,7 @@ const Seller =  require('../models/sequelize/Seller');
 const TransactionSeq = require('../models/sequelize/Transaction');
 const TransactionHistory = require('../models/sequelize/TransactionHistory');
 const TransactionMon = require('../models/mongo/Transaction');
-const { sendErrors } = require('../lib/utils');
+const { round } = require('../lib/utils');
 const Transaction = require("../models/mongo/Transaction");
 const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
 
@@ -42,9 +42,9 @@ router.post('/', async (req,res) => {
         deliveryAddress: '62, Fear Street Shadyside 456CA',
         cart: req.body.cart,
         cb: '424242424242',
-        amount: jsonCart.reduce((acc, product) => 
+        amount: round(jsonCart.reduce((acc, product) =>
             acc + product.price*product.quantity, 0
-        ),
+        ),2),
         currency: seller.currency,
         status: 'creating',
         SellerId: parseInt(req.body.sellerId),
@@ -63,6 +63,7 @@ router.post('/', async (req,res) => {
         id: transactionSeq.id,
         ...transaction,
         cart: jsonCart,
+        Seller: seller.dataValues,
         TransactionHistories: [transactionHistory.dataValues]
     });
 
@@ -83,15 +84,20 @@ router.post('/', async (req,res) => {
     }, 15000)
 })
 
-router.use(checkTokenMiddleWare('jwt'));
+router.use(checkTokenMiddleWare('both'));
 
 router.get("/", (request, response) => {
-    const { sellerId } = request.query;
-    if(request.user.sellerId && !sellerId) {
+    const sellerId = (request.user && request.user.sellerId) ?
+        request.user.sellerId :
+        request.seller ?
+            request.seller.id :
+            null;
+
+    if(sellerId && parseInt(request.query.sellerId) !== sellerId) {
         return response.sendStatus(403);
     }
 
-    Transaction.find(sellerId ? { "Seller.id": sellerId} : {})
+    Transaction.find(sellerId ? { "Seller.id": sellerId} : {}).sort({createdAt: -1})
         .then((data) => response.json(data))
         .catch((e) => response.sendStatus(500));
 });
