@@ -25,7 +25,7 @@ const ChartLine = () => {
                 )
             }])
 
-    ), [sellerToDisplay]);
+    ), [sellerToDisplay,user]);
 
     return (
         <div className="chart chartline">

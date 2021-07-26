@@ -7,16 +7,14 @@ export function CredentialsProvider({children}) {
     const [credentials,setCredentials] = useState([]);
     const [errors,setErrors] = useState([]);
 
-    const user = JSON.parse(localStorage.getItem('user'))
-
     useEffect(() => {
-        CredentialService.getCredentials(user.access_token)
+        CredentialService.getCredentials()
             .then(res => res.errors ? setErrors(res.errors) : setCredentials(res));
     }, []);
 
     const removeCredential = useCallback(
         (credentialToDelete) =>
-            CredentialService.removeCredential(user.access_token,credentialToDelete.id)
+            CredentialService.removeCredential(credentialToDelete.id)
             .then(res =>
                 res.errors ?
                     setErrors(res.errors) :
@@ -25,7 +23,7 @@ export function CredentialsProvider({children}) {
         [credentials]
     )
     const generateCredential = useCallback(
-        () => CredentialService.generateCredential(user.access_token)
+        () => CredentialService.generateCredential()
             .then(
                 res => res.errors ?
                     setErrors(res.errors) :
@@ -34,7 +32,7 @@ export function CredentialsProvider({children}) {
         [credentials]
     );
     const regenerateCredential = useCallback(
-        (credentialToUpdate) => CredentialService.regenerateCredential(user.access_token,credentialToUpdate.id)
+        (credentialToUpdate) => CredentialService.regenerateCredential(credentialToUpdate.id)
             .then(
                 res => res.errors ?
                     setErrors(res.errors) :

@@ -18,7 +18,7 @@ function App() {
             <header>
               <nav className="navbar navbar-expand-lg navbar-light bg-light">
                 <div className="container-fluid">
-                  <a className="navbar-brand">Backoffice</a>
+                  <Link className="navbar-brand" to="/">Backoffice</Link>
                   <div className="collapse navbar-collapse" id="navbarScroll">
                     <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
                       <li className="nav-item">

@@ -41,7 +41,7 @@ const ChartBar = () => {
                     }
                 )
             )
-    ), [sellerToDisplay]);
+    ), [sellerToDisplay,user]);
 
     return (
         <div className="chart chartbar">

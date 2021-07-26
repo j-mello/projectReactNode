@@ -89,7 +89,9 @@ export default function Index() {
                                             </TableRow>
 
                                         ) :
-                                        <TableCell align="center">Aucun marchand trouvé</TableCell>
+                                        <TableRow>
+                                            <TableCell align="center">Aucun marchand trouvé</TableCell>
+                                        </TableRow>
                                 }
                                     </TableBody>
                                 </Table>

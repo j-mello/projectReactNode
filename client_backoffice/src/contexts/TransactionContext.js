@@ -9,10 +9,10 @@ import TransactionService from "../services/TransactionService";
 
 export const TransactionContext = createContext([]);
 
-export default function TransactionProvider({ children, user }) {
+export default function TransactionProvider({ children , user}) {
     const [listTransaction, setListTransaction] = useState([]);
 
-    useEffect(() => user && TransactionService.getTransactions(user.access_token, user.SellerId ?? null).then(data => setListTransaction(data)), [user]);
+    useEffect(() => user && TransactionService.getTransactions(user.SellerId ?? null).then(data => setListTransaction(data)), [user]);
 
     return (
         <TransactionContext.Provider

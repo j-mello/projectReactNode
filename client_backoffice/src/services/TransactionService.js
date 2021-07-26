@@ -1,14 +1,9 @@
-import FormService from "./FormService";
+import request from "./request";
 
 const apiUrl = "http://"+window.location.hostname+":3001/transactions";
 
 export default class TransactionService {
-    static getTransactions(token, sellerId = null) {
-        return fetch(apiUrl + (sellerId ? '/?sellerId=' + sellerId : ''), {
-            headers: {
-                'Authorization': "Bearer " + token
-            }
-        })
-            .then(res => FormService.parseServerResponse(res));
+    static getTransactions(sellerId = null) {
+        return request(apiUrl + (sellerId ? '/?sellerId=' + sellerId : ''));
     }
 }
