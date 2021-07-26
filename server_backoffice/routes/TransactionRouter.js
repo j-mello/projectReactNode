@@ -4,84 +4,103 @@ const Seller =  require('../models/sequelize/Seller');
 const TransactionSeq = require('../models/sequelize/Transaction');
 const TransactionHistory = require('../models/sequelize/TransactionHistory');
 const TransactionMon = require('../models/mongo/Transaction');
-const { round } = require('../lib/utils');
+const { round, totalPriceCart } = require('../lib/utils');
 const Transaction = require("../models/mongo/Transaction");
 const checkTokenMiddleWare = require('../middleWares/checkTokenMiddleWare');
 
 const router = Router();
 
 router.post('/', async (req,res) => {
-    if(!req.body.sellerId || !req.body.cart)
-    {
-        res.sendStatus(400);
-        return;
-    }
 
-    const seller = await Seller.findOne({
-        where: {
-            id: req.body.sellerId
-        }
-    })
-    if (seller == null)
-        return res.sendStatus(404);
+    const {
+        redirectUrl, carts, cardNumber, deliveryAdd, facturationAdd
+    } = req.body;
 
-    let jsonCart = null;
+    let jsonCarts = null;
+
     try {
-        jsonCart = JSON.parse(req.body.cart);
+        jsonCarts = JSON.parse(carts)
     } catch (error) {
-        res.sendStatus(400);
+        console.error(error);
+        console.log({carts});
+        return res.render('payment.html.twig', {redirectUrl, carts, cardNumber, deliveryAdd, facturationAdd, error: "Problème du panier, merci de réésayer plus tard"});
+    }
+
+    if(!redirectUrl || !cardNumber || !facturationAdd || !deliveryAdd)
+    {
+        res.render('payment.html.twig', {redirectUrl, carts:jsonCarts, cardNumber, deliveryAdd, facturationAdd, totalPriceByCurrency: totalPriceCart(jsonCarts), error: "Un des champs n'a pas été renseigné"})
         return;
     }
 
-    if (jsonCart.find(product => product.currency !== seller.currency)) {
-        return res.sendStatus(400);
+    const transactionsPromises = [];
+
+    for(const sellerId in jsonCarts)
+    {
+        const seller = await Seller.findOne({
+            where: {
+                id: sellerId
+            }
+        })
+        if (seller == null)
+        return res.render('payment.html.twig', {redirectUrl, carts:jsonCarts, cardNumber, deliveryAdd, facturationAdd, totalPriceByCurrency: totalPriceCart(jsonCarts), error: "Un des vendeurs n'existe plus, il a été renvoyé"});
+
+        const jsonCart = jsonCarts[sellerId];
+
+        if (jsonCart.find(product => product.currency !== seller.currency)) {
+            return res.render('payment.html.twig', {redirectUrl, carts:jsonCarts, cardNumber, deliveryAdd, facturationAdd, totalPriceByCurrency: totalPriceCart(jsonCarts), error: "Une des devises ne correspond pas, contactez un responsable"});
+        }
+
+        transactionsPromises.push(async () => {
+            const transaction = {
+                facturationAddress: facturationAdd,
+                deliveryAddress: deliveryAdd,
+                cart: JSON.stringify(jsonCart),
+                cb: cardNumber,
+                amount: round(jsonCart.reduce((acc, product) =>
+                    acc + product.price*product.quantity, 0
+                ),2),
+                currency: seller.currency,
+                status: 'creating',
+                SellerId: parseInt(sellerId),
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
+
+
+            const transactionSeq = await new TransactionSeq(transaction).save();
+            const transactionHistory = await new TransactionHistory({
+                status: 'creating',
+                TransactionId: transactionSeq.id
+            }).save();
+
+            const transactionMon = await TransactionMon.create({
+                id: transactionSeq.id,
+                ...transaction,
+                cart: jsonCart,
+                Seller: seller.dataValues,
+                TransactionHistories: [transactionHistory.dataValues]
+            });
+
+            setTimeout(()=> {
+                transactionSeq.status = 'waiting';
+                transactionMon.status = 'waiting';
+                transactionMon.TransactionHistories.push({status: 'waiting', createdAt: new Date(), updatedAt: new Date()});
+
+                Promise.all([
+                    transactionSeq.save(),
+                    transactionMon.save(),
+                    new TransactionHistory({
+                        status: 'waiting',
+                        TransactionId: transactionSeq.id
+                    }).save()
+                ]);
+            }, 15000)
+        })
     }
 
-    const transaction = {
-        facturationAddress: '62, Fear Street Shadyside 456CA',
-        deliveryAddress: '62, Fear Street Shadyside 456CA',
-        cart: req.body.cart,
-        cb: '424242424242',
-        amount: round(jsonCart.reduce((acc, product) =>
-            acc + product.price*product.quantity, 0
-        ),2),
-        currency: seller.currency,
-        status: 'creating',
-        SellerId: parseInt(req.body.sellerId),
-        createdAt: new Date(),
-        updatedAt: new Date()
-    };
+    await Promise.all(transactionsPromises.map(promise => promise()));
 
-
-    const transactionSeq = await new TransactionSeq(transaction).save();
-    const transactionHistory = await new TransactionHistory({
-        status: 'creating',
-        TransactionId: transactionSeq.id
-    }).save();
-
-    const transactionMon = await TransactionMon.create({
-        id: transactionSeq.id,
-        ...transaction,
-        cart: jsonCart,
-        Seller: seller.dataValues,
-        TransactionHistories: [transactionHistory.dataValues]
-    });
-
-    res.sendStatus(200);
-    setTimeout(()=> {
-        transactionSeq.status = 'waiting';
-        transactionMon.status = 'waiting';
-        transactionMon.TransactionHistories.push({status: 'waiting', createdAt: new Date(), updatedAt: new Date()});
-
-        Promise.all([
-            transactionSeq.save(),
-            transactionMon.save(),
-            new TransactionHistory({
-                status: 'waiting',
-                TransactionId: transactionSeq.id
-            }).save()
-        ]);
-    }, 15000)
+    res.redirect(redirectUrl);
 })
 
 router.use(checkTokenMiddleWare('both'));

@@ -1,0 +1,56 @@
+<html>
+    <body>
+        <h1>Page de paiement</h1>
+
+        {% if error is defined %}
+            <p style="color: red;"> {{ error }} </p>
+        {% endif %}
+
+        Affichage panier
+        <ul>
+            {% for sellerId in carts|keys %}
+                {% for product in carts[sellerId] %}
+                    <li>
+                        <div>Produit : {{ product.name }} </div>
+                        <div>Quantité : {{ product.quantity }} </div>
+                        <div>Prix : {{ product.price }} {{ product.currency }}</div>
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+        Prix total
+        <ul>
+            {% for currency in totalPriceByCurrency|keys %}
+                <li> {{ currency }} : {{ totalPriceByCurrency[currency] }}</li>
+            {% endfor %}
+        </ul>
+        <form method="POST" action="/transactions">
+            
+            <label>Adresse de livraison</label>
+            <input name="deliveryAdd" type="text" 
+                {% if deliveryAdd is defined %}
+                    value="{{ deliveryAdd }}"
+                {% endif %}
+            />
+            <br>
+            <label>Adresse de facturation</label>
+            <input name="facturationAdd" type="text"
+                {% if facturationAdd is defined %}
+                    value="{{ facturationAdd }}"
+                {% endif %}/>
+            <br>
+            <label>Carte de paiement</label>
+            <input name="cardNumber" type="text"
+                {% if cardNumber is defined %}
+                    value="{{ cardNumber }}"
+                {% endif %}
+            />
+
+            <input type="hidden" value="{{ redirectUrl }}" name="redirectUrl">
+            <input type="hidden" value='{{ carts|json_encode()|replace({ "'" : "\'"}) }}' name="carts">
+            <br>
+            <input type="submit" value="Payer"/>
+        </form>
+        
+    </body>
+</html>
