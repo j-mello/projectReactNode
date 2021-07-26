@@ -21,19 +21,19 @@
         Prix total
         <ul>
             {% for currency in totalPriceByCurrency|keys %}
-                <li> {{ currency }} : {{ totalPriceByCurrency[currency] }}</li>
+                <li> {{ currency }} : {{ totalPriceByCurrency[currency] }}</li>
             {% endfor %}
         </ul>
         <form method="POST" action="/transactions">
             
-            <label>Addresse de livraison</label>
+            <label>Adresse de livraison</label>
             <input name="deliveryAdd" type="text" 
                 {% if deliveryAdd is defined %}
                     value="{{ deliveryAdd }}"
                 {% endif %}
             />
             <br>
-            <label>Addresse de facturation</label>
+            <label>Adresse de facturation</label>
             <input name="facturationAdd" type="text"
                 {% if facturationAdd is defined %}
                     value="{{ facturationAdd }}"
@@ -46,8 +46,8 @@
                 {% endif %}
             />
 
-            <input type="hidden" value="{{ redirectUrl }}" name="redirectUrl">
-            <input type="hidden" value='{{ carts|json_encode()|replace({ "'" : "\'"}) }}' name="carts">
+            <input type="hidden" value="{{ redirectUrl }}" name="redirectUrl">
+            <input type="hidden" value='{{ carts|json_encode()|replace({ "'" : "\'"}) }}' name="carts">
             <br>
             <input type="submit" value="Payer"/>
         </form>

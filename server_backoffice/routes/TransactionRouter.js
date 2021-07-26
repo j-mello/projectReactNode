@@ -26,11 +26,13 @@ router.post('/', async (req,res) => {
         return res.render('payment.html.twig', {redirectUrl, carts, cardNumber, deliveryAdd, facturationAdd, error: "Problème du panier, merci de réésayer plus tard"});
     }
 
-    if(!redirectUrl || !carts || !cardNumber || !facturationAdd || !deliveryAdd)
+    if(!redirectUrl || !cardNumber || !facturationAdd || !deliveryAdd)
     {
         res.render('payment.html.twig', {redirectUrl, carts:jsonCarts, cardNumber, deliveryAdd, facturationAdd, totalPriceByCurrency: totalPriceCart(jsonCarts), error: "Un des champs n'a pas été renseigné"})
         return;
     }
+
+    const transactionsPromises = [];
 
     for(const sellerId in jsonCarts)
     {
@@ -48,51 +50,56 @@ router.post('/', async (req,res) => {
             return res.render('payment.html.twig', {redirectUrl, carts:jsonCarts, cardNumber, deliveryAdd, facturationAdd, totalPriceByCurrency: totalPriceCart(jsonCarts), error: "Une des devises ne correspond pas, contactez un responsable"});
         }
 
-        const transaction = {
-            facturationAddress: facturationAdd,
-            deliveryAddress: deliveryAdd,
-            cart: JSON.stringify(jsonCart),
-            cb: cardNumber,
-            amount: round(jsonCart.reduce((acc, product) =>
-                acc + product.price*product.quantity, 0
-            ),2),
-            currency: seller.currency,
-            status: 'creating',
-            SellerId: parseInt(sellerId),
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
+        transactionsPromises.push(async () => {
+            const transaction = {
+                facturationAddress: facturationAdd,
+                deliveryAddress: deliveryAdd,
+                cart: JSON.stringify(jsonCart),
+                cb: cardNumber,
+                amount: round(jsonCart.reduce((acc, product) =>
+                    acc + product.price*product.quantity, 0
+                ),2),
+                currency: seller.currency,
+                status: 'creating',
+                SellerId: parseInt(sellerId),
+                createdAt: new Date(),
+                updatedAt: new Date()
+            };
 
 
-        const transactionSeq = await new TransactionSeq(transaction).save();
-        const transactionHistory = await new TransactionHistory({
-            status: 'creating',
-            TransactionId: transactionSeq.id
-        }).save();
+            const transactionSeq = await new TransactionSeq(transaction).save();
+            const transactionHistory = await new TransactionHistory({
+                status: 'creating',
+                TransactionId: transactionSeq.id
+            }).save();
 
-        const transactionMon = await TransactionMon.create({
-            id: transactionSeq.id,
-            ...transaction,
-            cart: jsonCart,
-            Seller: seller.dataValues,
-            TransactionHistories: [transactionHistory.dataValues]
-        });
+            const transactionMon = await TransactionMon.create({
+                id: transactionSeq.id,
+                ...transaction,
+                cart: jsonCart,
+                Seller: seller.dataValues,
+                TransactionHistories: [transactionHistory.dataValues]
+            });
 
-        setTimeout(()=> {
-            transactionSeq.status = 'waiting';
-            transactionMon.status = 'waiting';
-            transactionMon.TransactionHistories.push({status: 'waiting', createdAt: new Date(), updatedAt: new Date()});
+            setTimeout(()=> {
+                transactionSeq.status = 'waiting';
+                transactionMon.status = 'waiting';
+                transactionMon.TransactionHistories.push({status: 'waiting', createdAt: new Date(), updatedAt: new Date()});
 
-            Promise.all([
-                transactionSeq.save(),
-                transactionMon.save(),
-                new TransactionHistory({
-                    status: 'waiting',
-                    TransactionId: transactionSeq.id
-                }).save()
-            ]);
-        }, 15000)
+                Promise.all([
+                    transactionSeq.save(),
+                    transactionMon.save(),
+                    new TransactionHistory({
+                        status: 'waiting',
+                        TransactionId: transactionSeq.id
+                    }).save()
+                ]);
+            }, 15000)
+        })
     }
+
+    await Promise.all(transactionsPromises.map(promise => promise()));
+
     res.redirect(redirectUrl);
 })
 

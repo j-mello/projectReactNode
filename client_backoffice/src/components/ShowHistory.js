@@ -49,8 +49,7 @@ export default function ShowHistory({ selectedHistory = false }) {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Etat</TableCell>
-                                    <TableCell>Date création</TableCell>
-                                    <TableCell>Date modification</TableCell>
+                                    <TableCell>Date</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -67,7 +66,6 @@ export default function ShowHistory({ selectedHistory = false }) {
                                                 <TableCell>{row.status}</TableCell>
                                             }
                                             <TableCell>{parseDate(row.createdAt)}</TableCell>
-                                            <TableCell>{parseDate(row.updatedAt)}</TableCell>
                                         </TableRow>
                                     );
                                 })}
