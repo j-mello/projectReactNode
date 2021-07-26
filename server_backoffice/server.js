@@ -7,6 +7,7 @@ const TransactionRouter = require("./routes/TransactionRouter");
 const OperationRouter = require("./routes/OperationRouter");
 const { twig } = require("twig");
 const { migrate } = require("./lib/sequalizeloader");
+const { totalPriceCart } = require("./lib/utils");
 const cors = require('cors');
 
 migrate().then(()=>{
@@ -39,13 +40,7 @@ app.get("/payment", (req, res) => {
     res.render('payment.html.twig', {
         carts: jsonCarts, 
         redirectUrl : req.query.redirectUrl,
-        totalPriceByCurrency : Object.keys(jsonCarts).reduce((acc, SellerId)=>({
-            ...acc, ...jsonCarts[SellerId].reduce((acc, product) => ({
-                ...acc, [product.currency]: acc[product.currency] ? acc[product.currency] + product.price * product.quantity : product.price * product.quantity
-            }), acc)
-        })
-         ,{}   
-        )
+        totalPriceByCurrency : totalPriceCart(jsonCarts)
     });
 })
 

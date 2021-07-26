@@ -1,6 +1,11 @@
 <html>
     <body>
         <h1>Page de paiement</h1>
+
+        {% if error is defined %}
+            <p style="color: red;"> {{ error }} </p>
+        {% endif %}
+
         Affichage panier
         <ul>
             {% for sellerId in carts|keys %}
@@ -19,10 +24,31 @@
                 <li> {{ currency }} : {{ totalPriceByCurrency[currency] }}</li>
             {% endfor %}
         </ul>
-        <form method="POST">
+        <form method="POST" action="/transactions">
             
-            <input name="cardNumber"/>
-            
+            <label>Addresse de livraison</label>
+            <input name="deliveryAdd" type="text" 
+                {% if deliveryAdd is defined %}
+                    value="{{ deliveryAdd }}"
+                {% endif %}
+            />
+            <br>
+            <label>Addresse de facturation</label>
+            <input name="facturationAdd" type="text"
+                {% if facturationAdd is defined %}
+                    value="{{ facturationAdd }}"
+                {% endif %}/>
+            <br>
+            <label>Carte de paiement</label>
+            <input name="cardNumber" type="text"
+                {% if cardNumber is defined %}
+                    value="{{ cardNumber }}"
+                {% endif %}
+            />
+
+            <input type="hidden" value="{{ redirectUrl }}" name="redirectUrl">
+            <input type="hidden" value='{{ carts|json_encode()|replace({ "'" : "\'"}) }}' name="carts">
+            <br>
             <input type="submit" value="Payer"/>
         </form>
         
