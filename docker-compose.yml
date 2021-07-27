@@ -29,6 +29,9 @@ services:
 
   server_backoffice:
     image: node:alpine3.10
+    depends_on:
+      - db
+      - mongo
     ports:
       - 3001:3000
     environment:

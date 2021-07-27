@@ -223,16 +223,9 @@ router.post("/psp/:transactionId/:operationId", async (req, res) => {
 
     await TransactionMongo.create(generateMongoTransaction(
         transaction,
-        [{
-            ...operation.dataValues,
-            OperationHistories: [
-                ...operation.dataValues.OperationHistories.map(operationHistory =>
-                    operationHistory.dataValues
-                ),
-                newOperationHistory.dataValues
-            ]
-        }],
-        [transactionHistory.dataValues]
+        [],
+        [transactionHistory.dataValues],
+        {[operationId]: [newOperationHistory.dataValues]}
     ))
     res.sendStatus(201);
 });

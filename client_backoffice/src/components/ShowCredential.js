@@ -2,7 +2,7 @@ import React, {useContext} from 'react';
 import {CredentialsContext} from "../contexts/CredentialsContext";
 
 function ShowCredential({credential}) {
-    const {removeCredential, regenerateCredential} = useContext(CredentialsContext)
+    const {removeCredential, regenerateCredential} = useContext(CredentialsContext);
 
     return (
         <div>
