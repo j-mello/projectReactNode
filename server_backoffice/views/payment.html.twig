@@ -1,46 +1,87 @@
 <html>
-    <body>
+    <head>
+        <style>
+            .container {
+                width: 60%;
+                margin: auto;
+            }
+
+            h1 {
+                text-align: center;
+                margin-top: 20px;
+            }
+
+            input[type=text], select {
+              width: 100%;
+              padding: 12px 20px;
+              margin: 8px 0;
+              display: inline-block;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              box-sizing: border-box;
+            }
+
+            input[type=submit] {
+              width: 150px;
+              margin: auto;
+              background-color: #4CAF50;
+              color: white;
+              padding: 14px 20px;
+              margin: 8px 0;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+
+            input[type=submit]:hover {
+              background-color: #45a049;
+            }
+
+        </style>
+    </head>
+    <body class="container">
         <h1>Page de paiement</h1>
 
         {% if error is defined %}
             <p style="color: red;"> {{ error }} </p>
         {% endif %}
 
-        Affichage panier
-        <ul>
+        <h2>Mon panier<h2>
+        <ul style="list-style: none; padding: 0">
             {% for sellerId in carts|keys %}
                 {% for product in carts[sellerId] %}
-                    <li>
-                        <div>Produit : {{ product.name }} </div>
+                    <li style="background-color: #f2f2f2; padding: 20px; margin: 10px 0; display: flex;
+                        justify-content: space-between; align-items: center">
+                        <h3 style="">{{ product.name }}</h3>
                         <div>Quantité : {{ product.quantity }} </div>
-                        <div>Prix : {{ product.price }} {{ product.currency }}</div>
+                        <div>{{ product.price }} {{ product.currency }}</div>
                     </li>
                 {% endfor %}
             {% endfor %}
         </ul>
-        Prix total
-        <ul>
+        Prix total:
+        <ul style="list-style: none">
             {% for currency in totalPriceByCurrency|keys %}
-                <li> {{ currency }} : {{ totalPriceByCurrency[currency] }}</li>
+                <li> - {{ totalPriceByCurrency[currency] }} {{ currency }}</li>
             {% endfor %}
         </ul>
         <form method="POST" action="/transactions">
             
-            <label>Adresse de livraison</label>
-            <input name="deliveryAdd" type="text" 
+            <label for="aLivraison"><strong>Adresse de livraison</strong></label>
+            <input id="aLivraison" name="deliveryAdd" type="text"
                 {% if deliveryAdd is defined %}
                     value="{{ deliveryAdd }}"
                 {% endif %}
             />
             <br>
-            <label>Adresse de facturation</label>
-            <input name="facturationAdd" type="text"
+            <label for="aFacturation"><strong>Adresse de facturation</strong></label>
+            <input id="aFacturation" name="facturationAdd" type="text"
                 {% if facturationAdd is defined %}
                     value="{{ facturationAdd }}"
                 {% endif %}/>
             <br>
-            <label>Carte de paiement</label>
-            <input name="cardNumber" type="text"
+            <label for="card"><strong>Carte de paiement</strong></label>
+            <input id="card" name="cardNumber" type="text"
                 {% if cardNumber is defined %}
                     value="{{ cardNumber }}"
                 {% endif %}
@@ -49,7 +90,9 @@
             <input type="hidden" value="{{ redirectUrl }}" name="redirectUrl">
             <input type="hidden" value='{{ carts|json_encode()|replace({ "'" : "\'"}) }}' name="carts">
             <br>
-            <input type="submit" value="Payer"/>
+            <div style="display:flex; justify-content: center;">
+                <input type="submit" value="Payer"/>
+            </div>
         </form>
         
     </body>
