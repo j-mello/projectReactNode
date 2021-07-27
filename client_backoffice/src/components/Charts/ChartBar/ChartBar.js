@@ -101,16 +101,16 @@ const ChartBar = () => {
                     {
                         dataFrom: 'keys',
                         anchor: 'bottom-right',
-                        direction: 'row',
+                        direction: 'column',
                         justify: false,
-                        translateX: -300,
-                        translateY: -280,
-                        itemsSpacing: 10,
-                        itemWidth: 200,
+                        translateX: 120,
+                        translateY: 0,
+                        itemsSpacing: 15,
+                        itemWidth: 100,
                         itemHeight: 20,
-                        itemDirection: 'left-to-right',
+                        itemDirection: 'right-to-left',
                         itemOpacity: 0.85,
-                        symbolSize: 20,
+                        symbolSize: 15,
                         effects: [
                             {
                                 on: 'hover',

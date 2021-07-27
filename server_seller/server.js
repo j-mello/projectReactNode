@@ -5,9 +5,21 @@ const app = express();
 
 app.use(cors());
 
-app.use(express.json());
+app.use(express.urlencoded());
 
 
 app.post('/psp', (req, res) => {
-    console.log(req.body);
+    let {cart} = req.body;
+
+    try {
+        cart = JSON.parse(cart)
+    } catch (e) {
+        console.log("Invalid cart!");
+        return;
+    }
+
+    console.log("Panier validé! => ");
+    console.log(cart);
 })
+
+app.listen(process.env.PORT || 3000, () => console.log("server_seller listening"));

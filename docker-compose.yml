@@ -42,6 +42,28 @@ services:
     working_dir: /home/node/app
     command: sh -c "npm start --no-update-notifier"
 
+  server_psp:
+    image: node:alpine3.10
+    ports:
+      - 3003:3000
+    environment:
+      PORT: 3000
+    volumes:
+      - ./server_psp:/home/node/app
+    working_dir: /home/node/app
+    command: sh -c "npm start --no-update-notifier"
+
+  server_seller:
+    image: node:alpine3.10
+    ports:
+      - 3004:3000
+    environment:
+      PORT: 3000
+    volumes:
+      - ./server_seller:/home/node/app
+    working_dir: /home/node/app
+    command: sh -c "npm start --no-update-notifier"
+
   client_backoffice:
     image: node:alpine3.10
     ports:
