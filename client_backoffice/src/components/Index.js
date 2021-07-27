@@ -11,6 +11,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import {Button} from "@material-ui/core";
 
 export default function Index() {
     const [errors, setErrors] = useState([]);
@@ -34,7 +35,10 @@ export default function Index() {
             {
                 user != null &&
                 <>
-                    <h1 style={{textAlignVertical: "center", textAlign: "center"}}>Dashboard{ sellerToDisplay && " de " + sellerToDisplay.society }</h1>
+                    <h1 style={{
+                        textAlignVertical: "center",
+                        textAlign: "center"
+                    }}>Dashboard{sellerToDisplay && " de " + sellerToDisplay.society}</h1>
                     <ChartBar/>
                     <ChartLine/>
                     {
@@ -45,8 +49,14 @@ export default function Index() {
                             <TableContainer component={Paper}>
                                 {
                                     sellerToDisplay != null &&
-                                    <div style={{ textAlign: "center"}}>
-                                        <input type="button" value="Afficher tout le monde" onClick={() => setSellerToDisplay(null) | window.scrollTo(0, 0)}/>
+                                    <div style={{textAlign: "center"}}>
+                                        <Button
+                                            onClick={() => setSellerToDisplay(null) | window.scrollTo(0, 0)}
+                                            value="Afficher tout le monde"
+                                            variant="contained"
+                                            color="primary">
+                                            Afficher tout le monde
+                                        </Button>
                                     </div>
                                 }
                                 <Table className={classes.table}>
@@ -62,37 +72,47 @@ export default function Index() {
                                         </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                {
-                                    sellers.length > 0 ?
-                                        sellers.map(seller =>
-                                            <TableRow key={seller.id}>
-                                                <TableCell component="th" scope="row">
-                                                    {seller.id}
-                                                </TableCell>
-                                                <TableCell align="center">{seller.siren}</TableCell>
-                                                <TableCell align="center">{seller.society}</TableCell>
-                                                <TableCell align="center">{seller.urlRedirectConfirm}</TableCell>
-                                                <TableCell align="center">{seller.urlRedirectCancel}</TableCell>
-                                                <TableCell align="center">{seller.currency}</TableCell>
-                                                <TableCell align="right">
-                                                    {
-                                                        !seller.active ?
-                                                            <input type="button" value="Valider"
-                                                                   onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}/>
-                                                            :
-                                                            (!sellerToDisplay || sellerToDisplay.id !== seller.id) ?
-                                                                <input type="button" value="Afficher"
-                                                                       onClick={() => setSellerToDisplay(seller) | window.scrollTo(0, 0)}/> :
-                                                                <>Affiché</>
-                                                    }
-                                                </TableCell>
-                                            </TableRow>
-
-                                        ) :
-                                        <TableRow>
-                                            <TableCell align="center">Aucun marchand trouvé</TableCell>
-                                        </TableRow>
-                                }
+                                        {
+                                            sellers.length > 0 ?
+                                                sellers.map(seller =>
+                                                    <TableRow key={seller.id}>
+                                                        <TableCell component="th" scope="row">
+                                                            {seller.id}
+                                                        </TableCell>
+                                                        <TableCell align="center">{seller.siren}</TableCell>
+                                                        <TableCell align="center">{seller.society}</TableCell>
+                                                        <TableCell
+                                                            align="center">{seller.urlRedirectConfirm}</TableCell>
+                                                        <TableCell align="center">{seller.urlRedirectCancel}</TableCell>
+                                                        <TableCell align="center">{seller.currency}</TableCell>
+                                                        <TableCell align="right">
+                                                            {
+                                                                !seller.active ?
+                                                                    <Button
+                                                                        onClick={() => window.confirm('Voulez vous le valider?') && validSeller(seller)}
+                                                                        value="Valider"
+                                                                        variant="contained"
+                                                                        color="primary">
+                                                                        Valider
+                                                                    </Button>
+                                                                    :
+                                                                    (!sellerToDisplay || sellerToDisplay.id !== seller.id) ?
+                                                                        <Button
+                                                                            onClick={() => setSellerToDisplay(seller) | window.scrollTo(0, 0)}
+                                                                            value="Afficher"
+                                                                            variant="contained"
+                                                                            color="primary">
+                                                                            Afficher
+                                                                        </Button> :
+                                                                        <>Affiché</>
+                                                            }
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ) :
+                                                <TableRow>
+                                                    <TableCell align="center">Aucun marchand trouvé</TableCell>
+                                                </TableRow>
+                                        }
                                     </TableBody>
                                 </Table>
                             </TableContainer>
