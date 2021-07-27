@@ -1,4 +1,5 @@
-const { Router } = require("express");
+const http = require("http");
+const {Router} = require("express");
 const Operation = require("../models/sequelize/Operation");
 const OperationHistory = require("../models/sequelize/OperationHistory");
 const TransactionHistory = require("../models/sequelize/TransactionHistory");
@@ -11,7 +12,7 @@ const {sendErrors, isNumber, generateMongoTransaction} = require("../lib/utils")
 const router = Router();
 
 router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
-    if(req.body.sellerId === undefined && req.user.sellerId != undefined)
+    if (req.body.sellerId === undefined && req.user.sellerId != undefined)
         return res.sendStatus(403)
 
     TransactionMongo.aggregate([
@@ -44,7 +45,7 @@ router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
             },
         },
         {
-            $group:{
+            $group: {
                 _id: "$_id.date",
                 operations: {
                     $addToSet: {
@@ -56,7 +57,7 @@ router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
 
         },
         {
-            $sort: { "_id": 1 }
+            $sort: {"_id": 1}
         },
     ])
         .then(operations => res.json(operations))
@@ -65,7 +66,7 @@ router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
 
 const createOperation = async (req, res, transactionId, status, amount = null) => {
     const checkStatus = {
-        refund: ['refunding','refunded'],
+        refund: ['refunding', 'refunded'],
         refuse: ['refusing', 'refused'],
         capture: ['capturing', 'captured']
     }
@@ -108,10 +109,10 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
 
     let quotation;
     if (status === "refund") {
-        quotation = "Remboursement de "+amount+" "+transaction.currency;
+        quotation = "Remboursement de " + amount + " " + transaction.currency;
         if (amount < transaction.amount) {
-            operationStatus = "partial_"+operationStatus;
-            transactionStatus = "partial_"+transactionStatus;
+            operationStatus = "partial_" + operationStatus;
+            transactionStatus = "partial_" + transactionStatus;
         }
     } else if (status === "refuse") {
         quotation = "Paiement refusé";
@@ -142,9 +143,28 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
         }]
     ))
 
-    res.sendStatus(201);
+    const body = "cart=" + encodeURIComponent(transaction.cart)
 
-    setTimeout(async () => {
+    const optionPSP = {
+        host: "server_psp",
+        path: "/psp/" + transactionId + "/" + operation.id,
+        method: "POST",
+        port: 3000,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            'Content-length': Buffer.byteLength(body)
+        }
+    }
+
+    const request = http.request(optionPSP, (resRequest) => {
+        console.log("Send")
+        resRequest.on("end", () => console.log("PSP send") | res.sendStatus(201))
+    })
+
+    request.write(body)
+    request.end()
+
+    /*setTimeout(async () => {
         operation.finish = true;
         transaction.status = transactionStatus;
 
@@ -171,21 +191,26 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
             }],
             [transactionHistory.dataValues]
         ))
-    }, 15000)
+    }, 15000)*/
 }
 
 router.use(checkTokenMiddleWare('both'));
 
-router.post("/refund/:transactionId",  (req, res) =>
-    createOperation(req,res,req.params.transactionId,"refund",req.body.amount)
+router.post("/refund/:transactionId", (req, res) =>
+    createOperation(req, res, req.params.transactionId, "refund", req.body.amount)
 );
 
-router.post("/capture/:transactionId", (req,res) =>
-    createOperation(req,res,req.params.transactionId,"capture")
+router.post("/capture/:transactionId", (req, res) =>
+    createOperation(req, res, req.params.transactionId, "capture")
 );
 
-router.post("/refuse/:transactionId", (req,res) =>
-    createOperation(req,res,req.params.transactionId,"refuse")
+router.post("/refuse/:transactionId", (req, res) =>
+    createOperation(req, res, req.params.transactionId, "refuse")
 );
+
+router.post("/psp/:transactionId/:operationId", (req, res) => {
+    console.log(req.params)
+    res.sendStatus(200)
+});
 
 module.exports = router;
