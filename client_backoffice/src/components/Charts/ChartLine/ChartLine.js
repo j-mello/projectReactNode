@@ -69,7 +69,7 @@ const ChartLine = () => {
                         translateX: 100,
                         translateY: 0,
                         itemsSpacing: 0,
-                        itemDirection: 'left-to-right',
+                        itemDirection: 'right-to-left',
                         itemWidth: 80,
                         itemHeight: 20,
                         itemOpacity: 0.75,

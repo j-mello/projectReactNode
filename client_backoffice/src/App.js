@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { BrowserRouter, Route, Link} from "react-router-dom";
+import {BrowserRouter, Route} from "react-router-dom";
 import Index from "./components/Index";
 import Login from "./components/Login";
 import RegisterSeller from "./components/RegisterSeller";
@@ -9,77 +9,63 @@ import Transactions from "./components/Transactions";
 import TransactionProvider from "./contexts/TransactionContext";
 import SellerProvider from "./contexts/SellerContext";
 import SessionProvider, {SessionContext} from "./contexts/SessionContext";
+import {Container, Nav, Navbar} from 'react-bootstrap';
 
 function App() {
-  return (
-      <BrowserRouter>
+    return (
+        <BrowserRouter>
 
-          <SessionProvider>
-            <header>
-              <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                <div className="container-fluid">
-                  <Link className="navbar-brand" to="/">Backoffice</Link>
-                  <div className="collapse navbar-collapse" id="navbarScroll">
-                    <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                      <li className="nav-item">
-                        <Link className="nav-link active" aria-current="page" to="/">Accueil</Link>
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="d-flex">
-                      <ul className="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-                          <SessionContext.Consumer>
-                              {
-                                  ({user,logout}) =>
-                                      user == null ?
-                                          (<>
-                                              <li className="nav-item">
-                                                  <Link className="nav-link active" aria-current="page" to="/login">Se connecter</Link>
-                                              </li>
-                                              <li className="nav-item">
-                                                  <Link className="nav-link active" aria-current="page" to="/register-seller">S'inscrire (marchand)</Link>
-                                              </li>
-                                          </>)
-                                          :
-                                          (<>
-                                              <li className="nav-item">
-                                                  <Link className="nav-link active" aria-current="page" to="/infos">Informations</Link>
-                                              </li>
-                                              <li className="nav-item">
-                                                  <Link className="nav-link active" aria-current="page" to="/transactions">Transactions</Link>
-                                              </li>
-                                              <li className="nav-item">
-                                                  <a className="nav-link active" aria-current="page" href="#" onClick={logout}>Se déconnecter</a>
-                                              </li>
-                                          </>)
-                              }
-                          </SessionContext.Consumer>
-                      </ul>
-                  </div>
-                </div>
-              </nav>
-            </header>
-            <main>
-                <Route exact path="/register-seller" component={RegisterSeller}/>
-                <Route exact path="/login" component={Login}/>
-                <SessionContext.Consumer>
-                    {
-                        ({user}) =>
-                            <SellerProvider user={user}>
-                                <Route exact path="/" component={Index}/>
-                                <TransactionProvider user={user}>
-                                    <Route exact path="/transactions" component={Transactions} />
-                                </TransactionProvider>
-                            </SellerProvider>
-                    }
-                </SessionContext.Consumer>
-                <Route exact path="/infos" component={Infos}/>
+            <SessionProvider>
+                <header>
+                    <Navbar bg="light" expand="lg">
+                        <Container>
+                            <Navbar.Brand href="/">Backoffice</Navbar.Brand>
+                            <Navbar.Toggle aria-controls="basic-navbar-nav"/>
+                            <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
+                                <Nav>
+                                    <SessionContext.Consumer>
+                                        {
+                                            ({user, logout}) =>
+                                                user == null ?
+                                                    (<>
+                                                        <Nav.Link href="/login">Se connecter</Nav.Link>
+                                                        <Nav.Link href="/register-seller">S'inscrire
+                                                            (marchand)</Nav.Link>
+                                                    </>)
+                                                    :
+                                                    (<>
+                                                        <Nav.Link href="/infos">Informations</Nav.Link>
+                                                        <Nav.Link href="/transactions">Transactions</Nav.Link>
+                                                        <Nav.Link href="#" onClick={logout}>Se déconnecter</Nav.Link>
+                                                    </>)
+                                        }
+                                    </SessionContext.Consumer>
+                                </Nav>
+                            </Navbar.Collapse>
+                        </Container>
+                    </Navbar>
+                </header>
+                <main>
+                    <Route exact path="/register-seller" component={RegisterSeller}/>
+                    <Route exact path="/login" component={Login}/>
+                    <SessionContext.Consumer>
+                        {
+                            ({user}) =>
+                                <SellerProvider user={user}>
+                                    <Route exact path="/" component={Index}/>
+                                    <TransactionProvider user={user}>
+                                        <Route exact path="/transactions" component={Transactions}/>
+                                    </TransactionProvider>
+                                </SellerProvider>
+                        }
+                    </SessionContext.Consumer>
+                    <Route exact path="/infos" component={Infos}/>
 
-            </main>
-          </SessionProvider>
+                </main>
+            </SessionProvider>
 
-      </BrowserRouter>
-  );
+        </BrowserRouter>
+    );
 }
 
 export default App;
