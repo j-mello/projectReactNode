@@ -116,7 +116,7 @@ router.get("/", (request, response) => {
         return response.sendStatus(403);
     }
 
-    Transaction.find(sellerId ? { "Seller.id": sellerId} : {}).sort({createdAt: -1})
+    Transaction.find(sellerId ? { "Seller.id": sellerId} : {}).sort({updatedAt: -1})
         .then((data) => response.json(data))
         .catch((e) => response.sendStatus(500));
 });

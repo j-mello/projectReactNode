@@ -9,22 +9,17 @@ app.use(cors());
 app.use(express.urlencoded());
 
 app.post("/psp/:id/:operationId", (req, res) => {
-    const cart = req.body.cart
-    let jsonCart = null
+    const { cart } = req.body;
+
     try {
-        jsonCart = JSON.parse(cart)
-        console.log(jsonCart)
+        JSON.parse(cart)
     } catch (error) {
         console.error(error)
         return res.sendStatus(400)
     }
 
-    console.log("SendStatus")
-
     res.sendStatus(201)
-
-    /*setTimeout(() => {
-        console.log("setTimeout")
+    setTimeout(() => {
 
         const optionsBackoffice = {
             host: "server_backoffice",
@@ -34,8 +29,8 @@ app.post("/psp/:id/:operationId", (req, res) => {
         }
 
         http.request(optionsBackoffice, (res) => {
-            console.log("coucou")
-            res.on("end", () => console.log("Backoffice OK"))
+            res.on('data', () => {});
+            res.on("end", () => console.log("Notif sent to Backoffice!"));
         }).end()
 
         const body = "cart=" + encodeURIComponent(cart)
@@ -52,13 +47,13 @@ app.post("/psp/:id/:operationId", (req, res) => {
         }
 
         const request = http.request(optionsSeller, (res) => {
-            console.log("coucou2")
-            res.on("end", () => console.log("Seller OK"))
+            res.on('data', () => {});
+            res.on("end", () => console.log("Notif sent to Seller"));
         })
         request.write(body)
         request.end()
 
-    }, 5000)*/
+    }, 10000)
 })
 
 app.listen(process.env.PORT || 3000, () => console.log("server_psp listening"));

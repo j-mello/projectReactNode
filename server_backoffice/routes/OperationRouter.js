@@ -66,9 +66,9 @@ router.post("/kpi", checkTokenMiddleWare('jwt'), (req, res) => {
 
 const createOperation = async (req, res, transactionId, status, amount = null) => {
     const checkStatus = {
-        refund: ['refunding', 'refunded'],
-        refuse: ['refusing', 'refused'],
-        capture: ['capturing', 'captured']
+        refund: 'refunding',
+        refuse: 'refusing',
+        capture: 'capturing'
     }
 
     if (checkStatus[status] &&
@@ -77,8 +77,7 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
         return res.sendStatus(400);
     }
 
-    let operationStatus = checkStatus[status][0];
-    let transactionStatus = checkStatus[status][1];
+    let operationStatus = checkStatus[status];
 
     const transaction = await TransactionSeq.findOne({
         where: {id: transactionId},
@@ -112,7 +111,6 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
         quotation = "Remboursement de " + amount + " " + transaction.currency;
         if (amount < transaction.amount) {
             operationStatus = "partial_" + operationStatus;
-            transactionStatus = "partial_" + transactionStatus;
         }
     } else if (status === "refuse") {
         quotation = "Paiement refusé";
@@ -156,43 +154,77 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
         }
     }
 
-    const request = http.request(optionPSP, (resRequest) => {
-        console.log("Send")
-        resRequest.on("end", () => console.log("PSP send") | res.sendStatus(201))
+    const request = http.request(optionPSP, (resPsp) => {
+        resPsp.on('data', () => {});
+        resPsp.on('end', () => {
+            console.log("Request sent to psp");
+            res.sendStatus(201)
+        })
     })
 
-    request.write(body)
-    request.end()
-
-    /*setTimeout(async () => {
-        operation.finish = true;
-        transaction.status = transactionStatus;
-
-        const [,,transactionHistory,newOperationHistory] = await Promise.all([
-            operation.save(),
-            transaction.save(),
-            new TransactionHistory({
-                status: transactionStatus,
-                TransactionId: transaction.id
-            }).save(),
-            new OperationHistory({
-                finish: true,
-                OperationId: operation.id
-            }).save()
-        ]);
-
-        await TransactionMongo.deleteOne({id: transactionId});
-
-        await TransactionMongo.create(generateMongoTransaction(
-            transaction,
-            [{
-                ...operation.dataValues,
-                OperationHistories: [operationHistory.dataValues,newOperationHistory.dataValues]
-            }],
-            [transactionHistory.dataValues]
-        ))
-    }, 15000)*/
+    request.write(body);
+    request.end();
 }
+
+router.post("/psp/:transactionId/:operationId", async (req, res) => {
+    const { transactionId, operationId } = req.params;
+    const transaction = await TransactionSeq.findOne({
+        where: {id: parseInt(transactionId)},
+        include: [
+            Seller,
+            {model: Operation, include: [OperationHistory]},
+            TransactionHistory
+        ]
+    });
+
+    const transactionStatusByOperationStatus = {
+        capturing: 'captured',
+        refusing: 'refused',
+        refunding: 'refunded',
+        partial_refunding: 'partial_refunded'
+    }
+
+    let operation = null
+    if (transaction === null ||
+        !(operation = transaction.dataValues.Operations.find(
+            operation =>
+                operation.dataValues.id === parseInt(operationId) &&
+                !operation.dataValues.finish
+        ))) return res.sendStatus(404);
+
+    operation.finish = true;
+    transaction.status = transactionStatusByOperationStatus[operation.dataValues.status];
+
+    const [,,transactionHistory,newOperationHistory] = await Promise.all([
+        operation.save(),
+        transaction.save(),
+        new TransactionHistory({
+            status: transactionStatusByOperationStatus[operation.dataValues.status],
+            TransactionId: transaction.id
+        }).save(),
+        new OperationHistory({
+            finish: true,
+            OperationId: operation.id
+        }).save()
+    ]);
+
+    await TransactionMongo.deleteOne({id: transactionId});
+
+    await TransactionMongo.create(generateMongoTransaction(
+        transaction,
+        [{
+            ...operation.dataValues,
+            OperationHistories: [
+                ...operation.dataValues.OperationHistories.map(operationHistory =>
+                    operationHistory.dataValues
+                ),
+                newOperationHistory.dataValues
+            ]
+        }],
+        [transactionHistory.dataValues]
+    ))
+    res.sendStatus(201);
+});
 
 router.use(checkTokenMiddleWare('both'));
 
@@ -207,10 +239,5 @@ router.post("/capture/:transactionId", (req, res) =>
 router.post("/refuse/:transactionId", (req, res) =>
     createOperation(req, res, req.params.transactionId, "refuse")
 );
-
-router.post("/psp/:transactionId/:operationId", (req, res) => {
-    console.log(req.params)
-    res.sendStatus(200)
-});
 
 module.exports = router;
