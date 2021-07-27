@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import {useEffect, useState} from 'react';
+import {makeStyles} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -9,9 +9,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Modal from "./lib/Modal";
-import { parseDate } from "../lib/utils";
+import {parseDate} from "../lib/utils";
 
-export default function ShowHistory({ selectedHistory = false }) {
+export default function ShowHistory({selectedHistory = false}) {
 
     const [modal, setModal] = useState(selectedHistory);
     const [page, setPage] = useState(0);
@@ -55,20 +55,20 @@ export default function ShowHistory({ selectedHistory = false }) {
                             <TableBody>
                                 {
                                     (selectedHistory instanceof Array) && selectedHistory.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
-                                    return (
-                                        <TableRow key={row._id}>
-                                            {
-                                                row.finish !== undefined &&
-                                                <TableCell>{row.finish ? 'TERMINÉ' : 'EN COURS'}</TableCell>
-                                            }
-                                            {
-                                                row.status !== undefined &&
-                                                <TableCell>{row.status}</TableCell>
-                                            }
-                                            <TableCell>{parseDate(row.createdAt)}</TableCell>
-                                        </TableRow>
-                                    );
-                                })}
+                                        return (
+                                            <TableRow key={row._id}>
+                                                {
+                                                    row.finish !== undefined &&
+                                                    <TableCell>{row.finish ? 'TERMINÉ' : 'EN COURS'}</TableCell>
+                                                }
+                                                {
+                                                    row.status !== undefined &&
+                                                    <TableCell>{row.status}</TableCell>
+                                                }
+                                                <TableCell>{parseDate(row.createdAt)}</TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
                             </TableBody>
                         </Table>
                     </TableContainer>

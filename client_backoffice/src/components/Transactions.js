@@ -1,6 +1,6 @@
-import {useContext, useEffect, useState} from 'react';
-import { TransactionContext } from "../contexts/TransactionContext";
-import { makeStyles } from '@material-ui/core/styles';
+import React, {useContext, useState} from 'react';
+import {TransactionContext} from "../contexts/TransactionContext";
+import {makeStyles} from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
@@ -15,19 +15,19 @@ import Paper from '@material-ui/core/Paper';
 import TablePagination from '@material-ui/core/TablePagination';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
-import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import {SellerContext} from "../contexts/SellerContext";
 import {SessionContext} from "../contexts/SessionContext";
 import Button from "@material-ui/core/Button";
-import { parseDate } from "../lib/utils";
+import {parseDate} from "../lib/utils";
 import ShowHistory from "./ShowHistory";
+import {TextField} from "@material-ui/core";
 
 const Transactions = () => {
 
-    const { listTransaction } = useContext(TransactionContext);
-    const { sellers, sellerToDisplay, setSellerToDisplay } = useContext(SellerContext);
-    const { user } = useContext(SessionContext);
+    const {listTransaction} = useContext(TransactionContext);
+    const {sellers, sellerToDisplay, setSellerToDisplay} = useContext(SellerContext);
+    const {user} = useContext(SessionContext);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [selectedHistory, setSelectedHistory] = useState(null);
@@ -45,35 +45,40 @@ const Transactions = () => {
         if (event.target.value === 'null') {
             setSellerToDisplay(null)
         } else {
-            setSellerToDisplay(sellers.find(seller => seller.id === parseInt(event.target.value)));
+            setSellerToDisplay(sellers.find(seller => seller.id === parseInt(event.target.value)) ?? null);
         }
     };
 
     return (
         <div>
-            <ShowHistory selectedHistory={selectedHistory} />
-            <h1>Liste des transactions { sellerToDisplay && <> de {sellerToDisplay.society}</>}</h1>
+            <ShowHistory selectedHistory={selectedHistory}/>
+            <h1 style={{textAlign: "center"}}>Liste des
+                transactions {sellerToDisplay && <> de {sellerToDisplay.society}</>}</h1>
             {
                 user && user.SellerId === null &&
-                    <Select
-                        labelId="demo-simple-select-filled-label"
-                        id="demo-simple-select-filled"
-                        value={sellers}
-                        onChange={handleFilterChange}
-                    >
-                        <MenuItem value="null">
-                            <em>None</em>
-                        </MenuItem>
-                        {
-                            sellers.map(seller => (<MenuItem key={seller.id} value={seller.id}>{ seller.society }</MenuItem>))
-                        }
-                    </Select>
+                <TextField
+                    labelId="demo-simple-select-filled-label"
+                    select
+                    label="Vendeur"
+                    variant="outlined"
+                    value={sellers.society}
+                    onChange={handleFilterChange}
+                    style={{padding: "15px 0px", width: "25rem"}}
+                ><MenuItem
+                    key="null"
+                    value="Aucun">
+                    Aucun
+                </MenuItem>
+                    {
+                        sellers.map(seller => (<MenuItem key={seller.id} value={seller.id}>{seller.society}</MenuItem>))
+                    }
+                </TextField>
             }
             <TableContainer component={Paper}>
                 <Table aria-label="collapsible table">
                     <TableHead>
                         <TableRow>
-                            <TableCell />
+                            <TableCell/>
                             <TableCell><strong>Entreprise</strong></TableCell>
                             <TableCell align="right"><strong>Nombre d'articles</strong></TableCell>
                             <TableCell align="right"><strong>Prix total</strong></TableCell>
@@ -86,9 +91,9 @@ const Transactions = () => {
                     <TableBody>
                         {
                             listTransaction
-                                .filter(row => sellerToDisplay === null || row.Seller.id === sellerToDisplay.id)
+                                .filter(row => console.log(row.Seller, sellerToDisplay) | sellerToDisplay === null || row.Seller.id === sellerToDisplay.id)
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map(row => (<Row key={row._id} row={row} setSelectedHistory={setSelectedHistory} />))
+                                .map(row => (<Row key={row._id} row={row} setSelectedHistory={setSelectedHistory}/>))
                         }
                     </TableBody>
                 </Table>
@@ -106,7 +111,7 @@ const Transactions = () => {
     );
 }
 
-function Row({ row, setSelectedHistory }) {
+function Row({row, setSelectedHistory}) {
 
     const useRowStyles = makeStyles({
         root: {
@@ -123,7 +128,7 @@ function Row({ row, setSelectedHistory }) {
         <TableRow className={classes.root}>
             <TableCell>
                 <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-                    {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    {open ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
                 </IconButton>
             </TableCell>
             <TableCell component="th" scope="row">
@@ -135,13 +140,14 @@ function Row({ row, setSelectedHistory }) {
             <TableCell align="right">{row.status}</TableCell>
             <TableCell align="right">{parseDate(row.updatedAt)}</TableCell>
             <TableCell align="right">
-                <Button variant="contained" color="primary" onClick={() => setSelectedHistory([...row.TransactionHistories])}>
+                <Button variant="contained" color="primary"
+                        onClick={() => setSelectedHistory([...row.TransactionHistories])}>
                     Voir historique
                 </Button>
             </TableCell>
         </TableRow>
         <TableRow>
-            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+            <TableCell style={{paddingBottom: 0, paddingTop: 0}} colSpan={6}>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <Box margin={1}>
                         <Typography variant="h6" gutterBottom component="div">
@@ -188,7 +194,8 @@ function Row({ row, setSelectedHistory }) {
                                         <TableCell>{operation.status}</TableCell>
                                         <TableCell>{parseDate(operation.createdAt)}</TableCell>
                                         <TableCell>
-                                            <Button variant="contained" color="primary" onClick={() => setSelectedHistory([...operation.OperationHistories])}>
+                                            <Button variant="contained" color="primary"
+                                                    onClick={() => setSelectedHistory([...operation.OperationHistories])}>
                                                 Voir historique
                                             </Button>
                                         </TableCell>
@@ -196,9 +203,9 @@ function Row({ row, setSelectedHistory }) {
                                 ))}
                                 {
                                     row.Operations.length === 0 &&
-                                        <TableRow>
-                                            <TableCell>Aucune opération</TableCell>
-                                        </TableRow>
+                                    <TableRow>
+                                        <TableCell>Aucune opération</TableCell>
+                                    </TableRow>
                                 }
                             </TableBody>
                         </Table>
