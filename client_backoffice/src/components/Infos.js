@@ -2,7 +2,6 @@ import React, {useContext, useEffect, useState} from 'react';
 import Form from "./lib/Form";
 import Credentials from "./Credentials";
 import SellerForm from "../forms/UserForm";
-import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
 import PasswordForm from "../forms/PasswordForm";
 import {CredentialsProvider} from "../contexts/CredentialsContext";
@@ -27,7 +26,7 @@ function Infos() {
 	}, [user])
 
 	return ( user != null &&
-		<div>
+		<div style={{textAlign: "center"}}>
 			<h1>Vos informations personnelles</h1>
 		
       <Form model={SellerForm(false, user.Seller != null, currencies)} dataValues={dataValues} submitLabel="Modifier" onSubmit={changeInfos}>

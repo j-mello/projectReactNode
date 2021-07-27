@@ -3,7 +3,7 @@ import {ChartBar, ChartLine} from './Charts/Index';
 import {SellerContext} from "../contexts/SellerContext";
 import {SessionContext} from "../contexts/SessionContext";
 
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -29,7 +29,7 @@ export default function Index() {
         <div>
             {
                 user == null &&
-                <h1>Vous n'êtes pas connecté</h1>
+                <h1 style={{textAlign: "center"}}>Vous n'êtes pas connecté</h1>
             }
             {
                 user != null &&

@@ -21,22 +21,22 @@ export default function SessionProvider({children}) {
         (values) => AuthService.login(values)
             .then(res => res.errors ?
                 setLoginErrors(res.errors) :
-                (setLoginErrors([]) | localStorage.setItem("user",JSON.stringify(res)) | history.push('/') | setUser(res))
+                (setLoginErrors([]) | localStorage.setItem("user", JSON.stringify(res)) | history.push('/') | setUser(res))
             ),
-        [user,loginErrors]
+        [user, loginErrors]
     )
 
     const logout = useCallback(
-        () =>  user == null ?
+        () => user == null ?
             window.alert("Vous êtes déjà déconnecté") :
-                window.confirm("Voulez vous vous déconnecter ?") &&
-                (localStorage.removeItem("user") | history.push('/') | setUser(null)),
-            [user,loginErrors]
+            window.confirm("Voulez vous vous déconnecter ?") &&
+            (localStorage.removeItem("user") | history.push('/') | setUser(null)),
+        [user, loginErrors]
     )
 
-    const changePassword = useCallback(async ({password,password_confirm}) => {
+    const changePassword = useCallback(async ({password, password_confirm}) => {
         if (password !== "" && password === password_confirm) {
-            const res = await AuthService.editPassword({password,password_confirm},user.access_token);
+            const res = await AuthService.editPassword({password, password_confirm}, user.access_token);
             if (res.errors) {
                 setSuccessOrErrorsPassword(res.errors);
             } else {
@@ -47,8 +47,15 @@ export default function SessionProvider({children}) {
         }
     }, [])
 
-    const changeInfos = useCallback(async ({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone}) => {
-        const res = await AuthService.edit({siren,society,urlRedirectConfirm,urlRedirectCancel,currency,numPhone},user.access_token)
+    const changeInfos = useCallback(async ({siren, society, urlRedirectConfirm, urlRedirectCancel, currency, numPhone}) => {
+        const res = await AuthService.edit({
+            siren,
+            society,
+            urlRedirectConfirm,
+            urlRedirectCancel,
+            currency,
+            numPhone
+        }, user.access_token)
         if (res.errors) {
             setSuccessOrErrors(res.errors);
         } else {
@@ -70,7 +77,16 @@ export default function SessionProvider({children}) {
     }, [user])
 
     return (
-        <SessionContext.Provider value={{user,loginErrors,login,logout,successOrErrors,successOrErrorsPassword,changePassword,changeInfos}}>
+        <SessionContext.Provider value={{
+            user,
+            loginErrors,
+            login,
+            logout,
+            successOrErrors,
+            successOrErrorsPassword,
+            changePassword,
+            changeInfos
+        }}>
             {children}
         </SessionContext.Provider>
     )

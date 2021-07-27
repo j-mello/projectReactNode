@@ -1,8 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import AuthService from "../services/AuthService";
 import FormService from "../services/FormService";
-import { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import {useHistory} from "react-router-dom";
 import Form from "./lib/Form";
 import UserForm from "../forms/UserForm";
 import ConversionService from "../services/ConversionService";
@@ -11,8 +10,8 @@ function RegisterSeller() {
 
     const history = useHistory();
 
-    const [ errorsOrSuccess, setErrorsOrSuccess ] = useState(false);
-    const [ currencies, setCurrencies ] = useState([]);
+    const [errorsOrSuccess, setErrorsOrSuccess] = useState(false);
+    const [currencies, setCurrencies] = useState([]);
 
     useEffect(() => {
         ConversionService.getConversionRate()
@@ -36,8 +35,6 @@ function RegisterSeller() {
                 <div className="col-md-8">
                     <div className="card text-center">
                         <div className="card-header"><h2>Inscription marchand</h2></div>
-                        <Form onSubmit={register} submitLabel="S'inscrire" model={UserForm(true,true, currencies)}>
-                        </Form>
                         {
                             Array.isArray(errorsOrSuccess) &&
                             FormService.displayErrors(errorsOrSuccess)
@@ -46,6 +43,8 @@ function RegisterSeller() {
                             errorsOrSuccess === true &&
                             <div style={{color: "green"}}>Inscription réussie!!</div>
                         }
+                        <Form onSubmit={register} submitLabel="S'inscrire" model={UserForm(true, true, currencies)}>
+                        </Form>
                     </div>
                 </div>
             </div>

@@ -7,14 +7,14 @@ import {SessionContext} from '../contexts/SessionContext';
 function Index() {
     const {seller} = useContext(SessionContext);
     return (
-        <div>
+        <div style={{textAlign: "center"}}>
             <h1>Site marchand</h1>
-                <ProductProvider seller={seller}>
-                    {
-                        seller == null &&
-                        <ProductList/>
-                    }
-                </ProductProvider>
+            <ProductProvider seller={seller}>
+                {
+                    seller == null &&
+                    <ProductList/>
+                }
+            </ProductProvider>
         </div>
     )
 }
