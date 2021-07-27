@@ -1,22 +1,30 @@
 const TransactionFixtures = require('./TransactionFixtures')
 const Operation = require('../models/sequelize/Operation')
 const Transaction = require('../models/sequelize/Transaction')
-const { rand } = require('../lib/utils')
 
 class OperationFixtures {
     static async action () {
-        const transactionList = await Transaction.findAll()
-        const operationStatus = ['refusing', 'partial_refunding', 'refunding', 'capturing']
+        const transactionList = await Transaction.findAll();
+        const operationStatusByTransactionStatus = {
+            refused: 'refusing',
+            partial_refunded: 'partial_refunding',
+            refunded: 'refunding',
+            captured: 'capturing'
+        }
 
-        for(let i = 1; i <= 2000; i++){
-            await new Operation({
-                price: rand(1000,5000)/100,
-                quotation: "Text",
-                status: operationStatus[rand(0, operationStatus.length - 1)],
-                finish: rand(0,1) === 0,
-                TransactionId: transactionList[rand(0, transactionList.length - 1)].id,
-                createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
-            }).save()
+        for (const transaction of transactionList) {
+            if (['refused', 'partial_refunded', 'refunded', 'captured'].includes(transaction.status)) {
+                await new Operation({
+                    price: transaction.status === "partial_refunded" ?
+                        JSON.parse(transaction.cart)[0].price : transaction.amount,
+                    quotation: "This is a quotation",
+                    status: operationStatusByTransactionStatus[transaction.status],
+                    finish: true,
+                    TransactionId: transaction.id,
+                    createdAt: new Date(transaction.createdAt.getTime() + 1000*45),
+                    updatedAt: new Date(transaction.createdAt.getTime() + 1000*60)
+                }).save();
+            }
         }
     }
 

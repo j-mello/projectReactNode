@@ -1,19 +1,51 @@
 const TransactionFixtures = require('./TransactionFixtures')
 const Transaction = require("./../models/sequelize/Transaction");
 const TransactionHistory = require("./../models/sequelize/TransactionHistory");
-const { rand } = require('../lib/utils')
 
 class TransactionHistoryFixtures {
     static async action () {
-        const TransactionList = await Transaction.findAll()
-        const transactionHistoryStatus = ['creating', 'waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
+        const transactionList = await Transaction.findAll()
 
-        for(let i = 1; i <= 1000; i++){
-            await new TransactionHistory({
-                status: transactionHistoryStatus[rand(0, transactionHistoryStatus.length - 1)],
-                TransactionId: TransactionList[rand(0, TransactionList.length - 1)].id,
-                createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
-            }).save()
+        for (let transaction of transactionList) {
+
+            let promises = [() =>
+                new TransactionHistory({
+                    status: 'creating',
+                    TransactionId: transaction.id,
+                    createdAt: transaction.createdAt,
+                    updatedAt: transaction.createdAt
+                }).save(), () =>
+                new TransactionHistory({
+                    status: 'waiting',
+                    TransactionId: transaction.id,
+                    createdAt: new Date(transaction.createdAt.getTime()+1000*30),
+                    updatedAt: new Date(transaction.createdAt.getTime()+1000*30)
+                }).save()
+            ]
+
+            if (['refused', 'partial_refunded', 'refunded', 'captured'].includes(transaction.status)) {
+                promises.push(() =>
+                    new TransactionHistory({
+                        status: transaction.status,
+                        TransactionId: transaction.id,
+                        createdAt: new Date(transaction.createdAt.getTime()+1000*60),
+                        updatedAt: new Date(transaction.createdAt.getTime()+1000*60)
+                    }).save()
+                )
+                promises.push(() => transaction.update({
+                    updatedAt: new Date(transaction.createdAt.getTime()+1000*60),
+                }, {
+                    where: {id: transaction.id}
+                }));
+            } else {
+                promises.push(() => transaction.update({
+                    updatedAt: new Date(transaction.createdAt.getTime()+1000*20),
+                }, {
+                    where: {id: transaction.id}
+                }));
+            }
+
+            await Promise.all(promises.map(promise => promise()));
         }
     }
 

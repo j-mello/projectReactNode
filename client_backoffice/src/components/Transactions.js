@@ -182,7 +182,7 @@ function Row({row, setSelectedHistory}) {
                                     <TableCell><strong>Prix</strong></TableCell>
                                     <TableCell><strong>Etat</strong></TableCell>
                                     <TableCell><strong>Statut</strong></TableCell>
-                                    <TableCell><strong>Date création</strong></TableCell>
+                                    <TableCell><strong>Date de modification</strong></TableCell>
                                     <TableCell><strong>Actions</strong></TableCell>
                                 </TableRow>
                             </TableHead>
@@ -192,7 +192,7 @@ function Row({row, setSelectedHistory}) {
                                         <TableCell>{operation.price}</TableCell>
                                         <TableCell>{operation.finish ? 'TERMINÉ' : 'EN COURS'}</TableCell>
                                         <TableCell>{operation.status}</TableCell>
-                                        <TableCell>{parseDate(operation.createdAt)}</TableCell>
+                                        <TableCell>{parseDate(operation.updatedAt)}</TableCell>
                                         <TableCell>
                                             <Button variant="contained" color="primary"
                                                     onClick={() => setSelectedHistory([...operation.OperationHistories])}>

@@ -7,7 +7,7 @@ class TransactionFixtures {
     static async action() {
         const sellerList = await Seller.findAll()
 
-        const transactionStatus = ['creating', 'waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
+        const transactionStatus = ['waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
 
         for (let i = 1; i <= 1000; i++) {
             const seller = sellerList[rand(0, sellerList.length - 1)];
