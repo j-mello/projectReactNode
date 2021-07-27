@@ -97,19 +97,30 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
     if (transaction == null)
         return res.sendStatus(404);
 
-    if (transaction.status !== "waiting" || (sellerId && transaction.SellerId !== sellerId))
-        return res.sendStatus(403)
+    const totalRefundAmount = transaction.dataValues.Operations.reduce((acc,operation) =>
+            ["refunding","partial_refunding"].includes(operation.dataValues.status) ? acc+operation.dataValues.price : acc
+        ,0)+amount
+
+    if (["captured","refused","creating"].includes(transaction.dataValues.status) ||
+        transaction.dataValues.Operations.find(operation =>
+            !operation.dataValues.finish
+        ) ||
+        (status === "refund" && totalRefundAmount > transaction.dataValues.amount)){
+
+        return res.sendStatus(400)
+    }
+
+    if(sellerId && transaction.SellerId !== sellerId)
+        return res.sendStatus(403);
 
     if (amount == null) {
         amount = transaction.amount
-    } else if (amount > transaction.amount) {
-        return res.sendStatus(400);
     }
 
     let quotation;
     if (status === "refund") {
         quotation = "Remboursement de "+amount+" "+transaction.currency;
-        if (amount < transaction.amount) {
+        if (totalRefundAmount < transaction.amount) {
             operationStatus = "partial_"+operationStatus;
             transactionStatus = "partial_"+transactionStatus;
         }
