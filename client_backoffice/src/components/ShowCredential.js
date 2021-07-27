@@ -3,7 +3,7 @@ import {CredentialsContext} from "../contexts/CredentialsContext";
 import {Button, TextField} from "@material-ui/core";
 
 function ShowCredential({credential}) {
-    const {removeCredential, regenerateCredential} = useContext(CredentialsContext)
+    const {removeCredential, regenerateCredential} = useContext(CredentialsContext);
 
     return (
         <div style={{marginBottom: "20px"}}>

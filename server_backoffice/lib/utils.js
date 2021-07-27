@@ -29,28 +29,31 @@ const addNewCredentials = (SellerId) => new ClientCredential({
     SellerId
 }).save();
 
-const generateMongoTransaction = (transaction, operations = [], transactionsHistories = []) => ({
-    ...transaction.dataValues,
-    cart: JSON.parse(transaction.dataValues.cart),
-    Operations: [
-        ...transaction.dataValues.Operations.map(operation =>
-            ({
-                ...operation.dataValues,
-                OperationHistories: operation.dataValues.OperationHistories.map(operationHistory =>
-                    operationHistory.dataValues
-                )
-            })
-        ),
-        ...operations
-    ],
-    TransactionHistories: [
-        ...transaction.dataValues.TransactionHistories.map(transactionHistory =>
-            transactionHistory.dataValues
-        ),
-        ...transactionsHistories
-    ],
-    Seller: transaction.dataValues.Seller.dataValues
-})
+const generateMongoTransaction = (transaction, operations = [], transactionsHistories = [], operationsHistories = {}) => ({
+        ...transaction.dataValues,
+        cart: JSON.parse(transaction.dataValues.cart),
+        Operations: [
+            ...transaction.dataValues.Operations.map(operation =>
+                ({
+                    ...operation.dataValues,
+                    OperationHistories: [
+                        ...operation.dataValues.OperationHistories.map(operationHistory =>
+                            operationHistory.dataValues
+                        ),
+                        ...(operationsHistories[operation.dataValues.id] || [])
+                    ]
+                })
+            ),
+            ...operations
+        ],
+        TransactionHistories: [
+            ...transaction.dataValues.TransactionHistories.map(transactionHistory =>
+                transactionHistory.dataValues
+            ),
+            ...transactionsHistories
+        ],
+        Seller: transaction.dataValues.Seller.dataValues
+    })
 
 const totalPriceCart = (carts) => Object.keys(carts).reduce((acc, SellerId)=>({
     ...acc, ...carts[SellerId].reduce((acc, product) => ({
