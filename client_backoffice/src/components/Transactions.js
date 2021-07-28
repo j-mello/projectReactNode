@@ -88,6 +88,7 @@ const Transactions = () => {
                             <TableCell><strong>Entreprise</strong></TableCell>
                             <TableCell align="right"><strong>Nombre d'articles</strong></TableCell>
                             <TableCell align="right"><strong>Prix total</strong></TableCell>
+                            <TableCell align="right"><strong>Total remboursement</strong></TableCell>
                             <TableCell align="right"><strong>Currency</strong></TableCell>
                             <TableCell align="right"><strong>Statut</strong></TableCell>
                             <TableCell align="right"><strong>Dernière modification</strong></TableCell>
@@ -145,6 +146,7 @@ function Row({row, setSelectedHistory, setTransactionToRefund, setTransactionToC
             </TableCell>
             <TableCell align="right">{row.cart.length}</TableCell>
             <TableCell align="right">{row.amount}</TableCell>
+            <TableCell align="right">{row.totalRefund}</TableCell>
             <TableCell align="right">{row.currency}</TableCell>
             <TableCell align="right">{row.status}</TableCell>
             <TableCell align="right">{parseDate(row.updatedAt)}</TableCell>

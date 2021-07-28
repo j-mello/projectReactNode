@@ -129,7 +129,7 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
     }
 
     const operation = await new Operation({
-        price: amount,
+        price: ["capture", "refuse"].includes(status) ? amount - totalRefundAmount : amount,
         quotation,
         status: operationStatus,
         finish: false,

@@ -15,14 +15,13 @@ export default function TransactionProvider({children, user}) {
                     if (transaction.id === transactionToRefund.id) {
                         return {
                             ...transaction,
+                            totalRefund: transaction.totalRefund + parseFloat(amount),
                             Operations: [
                                 ...transaction.Operations,
                                 {
                                     price: parseFloat(amount),
                                     quotation: 'remboursement de ' + amount + ' ' + transactionToRefund.currency,
-                                    status: transaction.Operations.reduce((acc, operation) =>
-                                        operation.status === "partial_refunding" ? acc + operation.price : acc
-                                    , 0) + parseFloat(amount) === transaction.amount ? "refunding" : "partial_refunding",
+                                    status: transaction.totalRefund + parseFloat(amount) === transaction.amount ? "refunding" : "partial_refunding",
                                     finish: false,
                                     OperationHistories: [
                                         {
@@ -50,7 +49,7 @@ export default function TransactionProvider({children, user}) {
                         Operations: [
                             ...transaction.Operations,
                             {
-                                price: transaction.amount,
+                                price: transaction.amount - transaction.totalRefund,
                                 quotation: 'Capture de pikachu',
                                 status: "capturing",
                                 finish: false,
@@ -80,7 +79,7 @@ export default function TransactionProvider({children, user}) {
                             Operations: [
                                 ...transaction.Operations,
                                 {
-                                    price: transaction.amount,
+                                    price: transaction.amount - transaction.totalRefund,
                                     quotation: 'Refus de la transaction',
                                     status: "refusing",
                                     finish: false,
@@ -104,18 +103,21 @@ export default function TransactionProvider({children, user}) {
 
     const canCreateOperation = (transaction, refund = false) => {
 
-        const totalRefundAmount = transaction.Operations.reduce((acc,operation) =>
-                ["refunding","partial_refunding"].includes(operation.status) ? acc+operation.price : acc,0);
-
         if (["captured","refused","creating"].includes(transaction.status) ||
             transaction.Operations.find(operation => !operation.finish) ||
-                refund && totalRefundAmount >= transaction.amount) {
+                refund && transaction.totalRefund >= transaction.amount) {
             return false;
         }
         return true;
     }
 
-    useEffect(() => user && TransactionService.getTransactions(user.SellerId ?? null).then(data => setListTransaction(data)), [user]);
+    useEffect(() => user && TransactionService.getTransactions(user.SellerId ?? null).then(transactions =>
+        setListTransaction(transactions.map(transaction => ({
+            ...transaction,
+            totalRefund: transaction.Operations.reduce((acc,operation) =>
+                ["refunding","partial_refunding"].includes(operation.status) ? acc+operation.price : acc,0)
+        })))
+    ), [user]);
 
     return (
         <TransactionContext.Provider
