@@ -22,6 +22,8 @@ import Button from "@material-ui/core/Button";
 import {parseDate} from "../lib/utils";
 import ShowHistory from "./ShowHistory";
 import {TextField} from "@material-ui/core";
+import RefundModal from "./RefundModal";
+import CompleteTransactionModal from "./CompleteTransactionModal";
 
 const Transactions = () => {
 
@@ -31,6 +33,8 @@ const Transactions = () => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [selectedHistory, setSelectedHistory] = useState(null);
+    const [transactionToRefund, setTransactionToRefund] = useState(null)
+    const [transactionToComplete, setTransactionToComplete] = useState(null)
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -52,6 +56,8 @@ const Transactions = () => {
     return (
         <div>
             <ShowHistory selectedHistory={selectedHistory}/>
+            <RefundModal transaction={transactionToRefund} setTransaction={setTransactionToRefund}></RefundModal>
+            <CompleteTransactionModal transaction={transactionToComplete} setTransaction={setTransactionToComplete}></CompleteTransactionModal>
             <h1 style={{textAlign: "center"}}>Liste des
                 transactions {sellerToDisplay && <> de {sellerToDisplay.society}</>}</h1>
             {
@@ -91,9 +97,11 @@ const Transactions = () => {
                     <TableBody>
                         {
                             listTransaction
-                                .filter(row => console.log(row.Seller, sellerToDisplay) | sellerToDisplay === null || row.Seller.id === sellerToDisplay.id)
+                                .filter(row => sellerToDisplay === null || row.Seller.id === sellerToDisplay.id)
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map(row => (<Row key={row._id} row={row} setSelectedHistory={setSelectedHistory}/>))
+                                .map(row => (<Row key={row._id} row={row} setSelectedHistory={setSelectedHistory}
+                                                  setTransactionToRefund={setTransactionToRefund}
+                                                    setTransactionToComplete={setTransactionToComplete}/>))
                         }
                     </TableBody>
                 </Table>
@@ -111,7 +119,7 @@ const Transactions = () => {
     );
 }
 
-function Row({row, setSelectedHistory}) {
+function Row({row, setSelectedHistory, setTransactionToRefund, setTransactionToComplete}) {
 
     const useRowStyles = makeStyles({
         root: {
@@ -122,6 +130,7 @@ function Row({row, setSelectedHistory}) {
     });
 
     const [open, setOpen] = useState(false);
+    const { handleRefund, canCreateOperation } = useContext(TransactionContext);
     const classes = useRowStyles();
 
     return (<>
@@ -140,10 +149,24 @@ function Row({row, setSelectedHistory}) {
             <TableCell align="right">{row.status}</TableCell>
             <TableCell align="right">{parseDate(row.updatedAt)}</TableCell>
             <TableCell align="right">
-                <Button variant="contained" color="primary"
+                <Button variant="contained" color="primary" className="mx-1"
                         onClick={() => setSelectedHistory([...row.TransactionHistories])}>
                     Voir historique
                 </Button>
+                {
+                    canCreateOperation(row, true) &&
+                        <Button variant="contained" className="mx-1" color="primary"
+                                onClick={() => setTransactionToRefund(row)}>
+                            Créer un remboursement
+                        </Button>
+                }
+                {
+                    canCreateOperation(row) &&
+                        <Button variant="contained" className="mx-1" color="primary"
+                                onClick={() => setTransactionToComplete(row)}>
+                            Terminer la transaction
+                        </Button>
+                }
             </TableCell>
         </TableRow>
         <TableRow>

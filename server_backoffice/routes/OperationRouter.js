@@ -106,7 +106,6 @@ const createOperation = async (req, res, transactionId, status, amount = null) =
             !operation.dataValues.finish
         ) ||
         (status === "refund" && totalRefundAmount > transaction.dataValues.amount)){
-
         return res.sendStatus(400)
     }
 
@@ -232,9 +231,9 @@ router.post("/psp/:transactionId/:operationId", async (req, res) => {
 
 router.use(checkTokenMiddleWare('both'));
 
-router.post("/refund/:transactionId", (req, res) =>
+router.post("/refund/:transactionId", (req, res) => {
     createOperation(req, res, req.params.transactionId, "refund", req.body.amount)
-);
+});
 
 router.post("/capture/:transactionId", (req, res) =>
     createOperation(req, res, req.params.transactionId, "capture")

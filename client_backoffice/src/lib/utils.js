@@ -15,3 +15,5 @@ const addMissingZero = (number, n = 2) => {
     }
     return number;
 }
+
+export const isNumber = (str) => typeof str === "number" || (typeof str === "string" && parseFloat(str).toString() === str && str !== "NaN")
