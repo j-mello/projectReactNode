@@ -6,7 +6,7 @@ class OperationHistory extends Model {}
 
 OperationHistory.init(
     {
-        state: {
+        finish: {
             type: DataTypes.BOOLEAN,
             allowNull: false
         }

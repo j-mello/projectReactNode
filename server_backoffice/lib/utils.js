@@ -29,6 +29,44 @@ const addNewCredentials = (SellerId) => new ClientCredential({
     SellerId
 }).save();
 
+const generateMongoTransaction = (transaction, operations = [], transactionsHistories = [], operationsHistories = {}) => ({
+        ...transaction.dataValues,
+        cart: JSON.parse(transaction.dataValues.cart),
+        Operations: [
+            ...transaction.dataValues.Operations.map(operation =>
+                ({
+                    ...operation.dataValues,
+                    OperationHistories: [
+                        ...operation.dataValues.OperationHistories.map(operationHistory =>
+                            operationHistory.dataValues
+                        ),
+                        ...(operationsHistories[operation.dataValues.id] || [])
+                    ]
+                })
+            ),
+            ...operations
+        ],
+        TransactionHistories: [
+            ...transaction.dataValues.TransactionHistories.map(transactionHistory =>
+                transactionHistory.dataValues
+            ),
+            ...transactionsHistories
+        ],
+        Seller: transaction.dataValues.Seller.dataValues
+    })
+
+const totalPriceCart = (carts) => Object.keys(carts).reduce((acc, SellerId)=>({
+    ...acc, ...carts[SellerId].reduce((acc, product) => ({
+        ...acc, [product.currency]: acc[product.currency] ? acc[product.currency] + product.price * product.quantity : product.price * product.quantity
+    }), acc)
+})
+ ,{}   
+)
+
 const rand = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 
-module.exports = { sendErrors, generateRandomString, generateAccessToken, addNewCredentials, rand };
+const isNumber = (n) => (typeof(n) == "number" || ( typeof(n) == "string" && parseFloat(n).toString() === n && n !== "NaN")) && parseFloat(n);
+
+const round = (n,p) => Math.floor(n*10**p)/10**p;
+
+module.exports = { sendErrors, generateMongoTransaction, generateRandomString, generateAccessToken, addNewCredentials, totalPriceCart, rand, isNumber, round };

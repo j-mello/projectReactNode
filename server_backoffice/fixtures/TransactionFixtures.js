@@ -5,35 +5,41 @@ const { rand } = require('../lib/utils')
 
 class TransactionFixtures {
     static async action() {
-        const sellerIdList = await Seller.findAll()
+        const sellerList = await Seller.findAll()
 
-        const transactionStatus = ['creating', 'waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
+        const transactionStatus = ['waiting', 'refused', 'partial_refunded', 'refunded', 'captured']
 
-        for (let i = 1; i <= 50; i++) {
+        for (let i = 1; i <= 1000; i++) {
+            const seller = sellerList[rand(0, sellerList.length - 1)];
+            const cart = [
+                {
+                    name: "Bananes",
+                    price: rand(1, 100),
+                    quantity: rand(1, 10),
+                },
+                {
+                    name: "Pommes",
+                    price: rand(1, 100),
+                    quantity: rand(1, 10),
+                },
+                {
+                    name: "Poires",
+                    price: rand(1, 100),
+                    quantity: rand(1, 10),
+                },
+            ];
+            const amount = cart.reduce((acc,product) =>
+                acc + product.price*product.quantity
+            , 0)
             await new Transaction({
                 facturationAddress: "2 rue des bananes",
                 deliveryAddress: "2 rue des bananes",
-                cart: JSON.stringify([
-                    {
-                        name: "Bananes",
-                        price: rand(1, 100),
-                        quantity: rand(1, 10),
-                    },
-                    {
-                        name: "Pommes",
-                        price: rand(1, 100),
-                        quantity: rand(1, 10),
-                    },
-                    {
-                        name: "Poires",
-                        price: rand(1, 100),
-                        quantity: rand(1, 10),
-                    },
-                ]),
-                amount: rand(1000, 20000)/100,
-                currency: "EUR",
+                cb: "4242424242424242",
+                cart: JSON.stringify(cart),
+                amount: amount,
+                currency: seller.currency,
                 status: transactionStatus[rand(0, transactionStatus.length - 1)],
-                SellerId: sellerIdList[rand(0, sellerIdList.length - 1)].id,
+                SellerId: seller.id,
                 createdAt: new Date(rand(new Date().getTime()-604800000, new Date().getTime()))
             }).save()
         }

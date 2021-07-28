@@ -1,16 +1,15 @@
-import FormService from "./FormService";
+import request from "./request";
 
 const apiUrl = "http://"+window.location.hostname+":3001/sellers";
 
 export default class SellerService {
-    static getSellers(token) {
-        return fetch(apiUrl+'?token='+token)
-            .then(res => FormService.parseServerResponse(res));
+    static getSellers() {
+        return request(apiUrl);
     }
 
-    static validSeller(token,sellerId) {
-        return fetch(apiUrl+'/'+sellerId+'/active/?token='+token, {
-            method: "POST"
-        }).then(res => FormService.parseServerResponse(res));
+    static validSeller(sellerId) {
+        return request(apiUrl+'/'+sellerId+'/active', {
+            method: 'POST'
+        });
     }
 }

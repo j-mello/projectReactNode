@@ -1,16 +1,27 @@
+import request from "./request";
 import FormService from "./FormService";
 
-const apiUrl = "http://"+window.location.hostname+":3001/kpi";
+const transactionUrl = "http://"+window.location.hostname+":3001/transactions/kpi";
+const operationUrl = "http://"+window.location.hostname+":3001/operations/kpi";
 
-export default class SellerService {
-    static getTransactions(token) {
-        return fetch(apiUrl+'?token='+token)
-            .then(res => FormService.parseServerResponse(res));
+export default class KPIService {
+    static getTransactionsKPI(sellerId = null) {
+        return request(transactionUrl, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: FormService.generateUrlEncodedBody({sellerId})
+        });
     }
 
-    static getOperations(token,sellerId) {
-        return fetch(apiUrl+'/'+sellerId+'/active/?token='+token, {
-            method: "POST"
-        }).then(res => FormService.parseServerResponse(res));
+    static getOperationKPI(sellerId = null) {
+        return request(operationUrl, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            },
+            body: FormService.generateUrlEncodedBody({sellerId})
+        });
     }
 }

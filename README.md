@@ -1,7 +1,10 @@
 # projectReactNode
 
 ## Commandes :
- - Créer un admin : docker-compose exec server node bin/console.js admin:create -e admin@admin -p unMotDePasse -n 0606060606
+ - Créer un admin : docker-compose exec server_backoffice node bin/console.js admin:create -e admin@admin -p unMotDePasse -n 0606060606
+ - Lancer le scrapping des devises : docker-compose exec server_backoffice node converterRate.js
+ - Charger les fixtures : docker-compose exec server_backoffice node bin/console.js fixtures:load
+
  
 ## Parcours :
  - Créer un compte admin en invite de commande

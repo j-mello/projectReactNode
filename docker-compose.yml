@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   mongo:
-    image: mongo
+    image: mongo:bionic
     ports:
       - 27017:27017
     environment:
@@ -20,9 +20,18 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - db-data:/var/lib/postgresql/data:rw
+  
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
 
   server_backoffice:
     image: node:alpine3.10
+    depends_on:
+      - db
+      - mongo
     ports:
       - 3001:3000
     environment:
@@ -33,6 +42,28 @@ services:
       CONVERTER_RATE_API_KEY: "e92a8080144940310b62cd6113fb28e4"
     volumes:
       - ./server_backoffice:/home/node/app
+    working_dir: /home/node/app
+    command: sh -c "npm start --no-update-notifier"
+
+  server_psp:
+    image: node:alpine3.10
+    ports:
+      - 3003:3000
+    environment:
+      PORT: 3000
+    volumes:
+      - ./server_psp:/home/node/app
+    working_dir: /home/node/app
+    command: sh -c "npm start --no-update-notifier"
+
+  server_seller:
+    image: node:alpine3.10
+    ports:
+      - 3004:3000
+    environment:
+      PORT: 3000
+    volumes:
+      - ./server_seller:/home/node/app
     working_dir: /home/node/app
     command: sh -c "npm start --no-update-notifier"
 

@@ -1,63 +1,80 @@
-import React, {useState} from 'react';
+import React, {useCallback, useContext, useState} from 'react';
+import {SessionContext} from "../contexts/SessionContext";
+import {Button, TextField} from "@material-ui/core";
 
 function Login() {
+    const {login, loginFailed} = useContext(SessionContext);
     const [values, setValues] = useState({
         clientId: '',
         clientSecret: ''
     });
-    const [errorOrSuccess, setErrorOrSuccess] = useState(null);
 
-    const handleChange = (e) => {
+    const handleChange = useCallback((e) => {
         setValues({
             ...values,
             [e.target.name]: e.target.value
         });
-    }
+    }, [values])
 
-    const connect = async (e) => {
-        e.preventDefault();
-
-        let res = await fetch( 'http://'+window.location.hostname+':3001/auth/login-oauth2', {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-            },
-            body: Object.keys(values).map(key => key+"="+encodeURIComponent(values[key])).join("&")+"&grant_type="+encodeURIComponent("client_credentials")
-        });
-
-        if (res.status === 200) {
-            localStorage.setItem("seller", JSON.stringify(await res.json()));
-            setErrorOrSuccess(true);
-            setTimeout(() => {
-                window.location.href = "/";
-            }, 500);
-        } else {
-            setErrorOrSuccess(false);
-        }
-    }
+    const connect = useCallback(
+        (e) => {
+            e.preventDefault();
+            login(values);
+        }, [login, values]
+    )
 
     return (
         <>
-            <h1>Connexion marchand</h1>
-            <form onSubmit={connect}>
-                <label>
-                    Client id :
-                    <input name="clientId" type="text" value={values.client_id} onChange={handleChange}/>
-                </label><br/>
-                <label>
-                    Client secret :
-                    <input name="clientSecret" type="text" value={values.client_secret} onChange={handleChange}/>
-                </label><br/>
-                <input type="submit" value="Connexion"/>
-            </form>
-            {
-                errorOrSuccess === false &&
-                    <p style={{color: 'red'}}>Echec de connexion</p>
-            }
-            {
-                errorOrSuccess === true &&
-                    <p style={{color: 'green'}}>Connexion réussi</p>
-            }
+            <div className="container mt-5">
+                <div className="row justify-content-center">
+                    <div className="col-md-8">
+                        <div className="card text-center">
+                            <div className="card-header"><h2>Connexion marchand</h2></div>
+                            {
+                                loginFailed &&
+                                <p style={{color: 'red'}}>Echec de connexion</p>
+                            }
+                            <form onSubmit={connect} style={{marginTop: "10px"}}>
+                                <div>
+                                    <TextField
+                                        id="outlined-basic"
+                                        label="Cliend Id"
+                                        variant="outlined"
+                                        name="clientId"
+                                        type="text"
+                                        value={values.clientId}
+                                        onChange={handleChange}
+                                        style={{padding: "15px 0px", width: "25rem"}}
+                                    />
+                                </div>
+                                <div>
+                                    <TextField
+                                        id="outlined-basic"
+                                        label="Client Secret"
+                                        variant="outlined"
+                                        name="clientSecret"
+                                        type="text"
+                                        value={values.clientSecret}
+                                        onChange={handleChange}
+                                        style={{padding: "15px 0px", width: "25rem"}}
+                                    />
+                                </div>
+
+                                <Button
+                                    type="submit"
+                                    value="Connexion"
+                                    variant="contained"
+                                    color="primary"
+                                    style={{marginBottom: "20px"}}>
+                                    Valider
+                                </Button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </>
     )
 }

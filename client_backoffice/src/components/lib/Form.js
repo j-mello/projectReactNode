@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
+import {TextField, MenuItem, Button} from '@material-ui/core';
 
 // Example model :
 // optionnels : default, minLength, maxLength
@@ -15,54 +16,82 @@ import React, {useState} from 'react';
 //            }
 // }
 
-export default function Form({model, submitLabel , onSubmit, dataValues}) {
-    const [ values, setValues ] = useState(Object.keys(model).reduce((acc, fieldName) => {
-        if (dataValues && dataValues[fieldName]) {
-            acc[fieldName] = dataValues[fieldName];
-        } else {
-            acc[fieldName] = model[fieldName].default ?? ""
-        }
+export default function Form({model, submitLabel, onSubmit, dataValues}) {
+    const [values, setValues] = useState(Object.keys(model).reduce((acc, fieldName) => {
+        acc[fieldName] = model[fieldName].default ?? "";
         return acc;
     }, {}));
+
+    useEffect(() => {
+        setValues(Object.keys(model).reduce((acc, fieldName) => {
+            if (dataValues && dataValues[fieldName]) {
+                acc[fieldName] = dataValues[fieldName];
+            } else {
+                acc[fieldName] = model[fieldName].default ?? ""
+            }
+            return acc;
+        }, {}))
+    }, [dataValues])
 
     const handleChange = (event) => {
         setValues({...values, [event.target.name]: event.target.value})
     }
 
     return (
-        <form onSubmit={
+        <form style={{ marginTop: "10px" }} onSubmit={
             e => e.preventDefault() ||
                 onSubmit(Object.keys(values).reduce(
-                    (acc, valueKey) => ({...acc, [valueKey]: values[valueKey] !== "" ? values[valueKey] : null}) , {}))
+                    (acc, valueKey) => ({...acc, [valueKey]: values[valueKey] !== "" ? values[valueKey] : null}), {}))
         }>
             {
                 Object.keys(model).map(fieldName =>
                     <div key={fieldName}>
-                        <label>
-                            {model[fieldName].label} :
-                            {
-                                model[fieldName].type === "select" ?
-                                    <select name={fieldName} onChange={handleChange} value={values[fieldName]}>
-                                        {
-                                            Object.keys(model[fieldName].options).map(optionValue =>
-                                                <option key={"option-"+optionValue} value={optionValue}>{model[fieldName].options[optionValue]}</option>
-                                            )
-                                        }
-                                    </select>
-                                    :
-                                    <input
-                                        name={fieldName}
-                                        type={model[fieldName].type}
-                                        value={values[fieldName]} onChange={handleChange}
-                                        {...(model[fieldName].minLength && {minLength: model[fieldName].minLength})}
-                                        {...(model[fieldName].maxLength && {maxLength: model[fieldName].maxLength})}
-                                    />
-                            }
-                        </label>
+                        {
+                            model[fieldName].type === "select" ?
+                                <TextField
+                                    id="outlined-select-currency"
+                                    select
+                                    label={model[fieldName].label}
+                                    onChange={handleChange}
+                                    variant="outlined"
+                                    name={fieldName}
+                                    value={values[fieldName]}
+                                    style={{padding: "15px 0px", width: "25rem"}}
+                                >{
+                                    Object.keys(model[fieldName].options).map(optionValue =>
+                                        <MenuItem
+                                            key={"option-" + optionValue}
+                                            value={optionValue}>
+                                            {model[fieldName].options[optionValue]}
+                                        </MenuItem>
+                                    )
+                                }
+                                </TextField>
+                                :
+                                <TextField
+                                    id="outlined-basic"
+                                    label={model[fieldName].label}
+                                    variant="outlined"
+                                    name={fieldName}
+                                    type={model[fieldName].type}
+                                    value={values[fieldName]} onChange={handleChange}
+                                    style={{padding: "15px 0px", width: "25rem"}}
+                                    {...(model[fieldName].minLength && {minLength: model[fieldName].minLength})}
+                                    {...(model[fieldName].maxLength && {maxLength: model[fieldName].maxLength})}
+                                />
+                        }
                     </div>
                 )
             }
-            <input type="submit" value={submitLabel}/>
+
+            <Button
+                type="submit"
+                value={submitLabel}
+                variant="contained"
+                color="primary"
+                style={{marginBottom: "20px"}}>
+                Valider
+            </Button>
         </form>
     )
 }

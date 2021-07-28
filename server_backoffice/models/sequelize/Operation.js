@@ -12,10 +12,6 @@ Operation.init(
             primaryKey: true,
             allowNull: false
         },
-        cb: {
-            type: DataTypes.STRING,
-            allowNull: false
-        },
         price: {
             type: DataTypes.FLOAT,
             allowNull: false
